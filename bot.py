@@ -16,7 +16,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.message.chat.id
 
     # چک کردن آیا پیام شامل لینک اختصاصی است
-    if update.message.text == 'https://t.me/shadow_byte_bot?start=getfile':
+    if update.message.text == 'https://t.me/shadow_byte_bot?start=12':
         # ارسال فایل به کاربر
         await context.bot.send_document(chat_id, file_url)
 
