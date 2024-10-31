@@ -39,6 +39,7 @@ async def receive_user_id(update: Update, context: CallbackContext) -> None:
         )
         
         print(f"در حال ارسال فایل به کاربر با شناسه: {chat_id}...")  # چاپ شناسه کاربر
+        print(f"شناسه کاربری دریافتی: {user_id}")  # چاپ شناسه کاربری ارسال شده توسط کاربر
         await send_file(chat_id, context)  # ارسال فایل
     else:
         await context.bot.send_message(
