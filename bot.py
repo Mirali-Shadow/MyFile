@@ -6,7 +6,7 @@ TOKEN = "6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs"
 
 # تابع برای ارسال فایل به کاربر
 async def start(update: Update, context: CallbackContext) -> None:
-    await context.bot.send_document(chat_id=update.effective_chat.id, document=open("https://github.com/Mirali-Shadow/MyFile/blob/1da71e7d2321d5224725caefceb6571ccea67962/Pishro%20-%20Tamum%20Shode%20(featuring%20Kamyar).mp3", 'rb'))
+    await context.bot.send_document(chat_id=update.effective_chat.id, document=open("/workspaces/MyFile/Pishro - Tamum Shode (featuring Kamyar).mp3", 'rb'))
 
 # راه‌اندازی و افزودن هندلرها
 def main():
