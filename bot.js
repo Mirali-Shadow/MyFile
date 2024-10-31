@@ -35,8 +35,8 @@ bot.onText(/دانلود موزیک/, (msg) => {
         reply_markup: {
             inline_keyboard: [
                 [
-                    { text: "کانال 1", url: "https://t.me/shadow_x3" },
-                    { text: "کانال 2", url: "https://t.me/mirali_vibe" }
+                    { text: "کانال 1", url: "https://t.me/MiRALi_ViBE" },
+                    //{ text: "کانال2", url: "https://t.me/mirali_vibe" }
                 ],
                 [{ text: "برگشت", callback_data: "back_to_main" }]
             ]
