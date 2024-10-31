@@ -3,16 +3,16 @@ const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 
 // توکن ربات خود را جایگزین کنید
-const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
+const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs'; // توکن ربات خود را وارد کنید
 
 // یک نمونه از ربات ایجاد کنید
 const bot = new TelegramBot(token, { polling: true });
 
-// نام فایلی که می‌خواهید ارسال کنید را مشخص کنید
-const fileName = 'benz.mp3'; // نام فایل را به دلخواه تغییر دهید
+// لینک مستقیم به فایل شما در GitHub
+const fileUrl = 'https://raw.githubusercontent.com/Mirali-Shadow/MyFile/2fa16293c554cc38e87fa56831e94d52f0ef3a5d/Seft%20(Djsajjad1%20%26%20BLH%20Remix).mp3';
 
 // لینک خاصی که کاربران روی آن کلیک می‌کنند
-const specialLink = 'https://t.me/Shadow_byte_Bot?start=n2s1ds2d2s7d545s'; // لینک واقعی خود را جایگزین کنید
+const specialLink = 'https://t.me/Shadow_byte_bot?start=getfile'; // نام کاربری ربات خود را وارد کنید
 
 // گوش دادن به پیام‌ها
 bot.onText(/\/start/, (msg) => {
@@ -22,18 +22,14 @@ bot.onText(/\/start/, (msg) => {
 
 // تابعی برای ارسال فایل
 function sendFile(chatId) {
-    // ارسال فایل به کاربر
-    bot.sendDocument(chatId, fileName)
+    // ارسال فایل به کاربر از لینک مستقیم
+    bot.sendDocument(chatId, fileUrl)
         .then(() => {
             console.log(`فایل به ${chatId} ارسال شد`);
 
-            // بعد از 1 دقیقه (60000 میلی‌ثانیه) فایل را حذف کنید
+            // حذف فایل بعد از 1 دقیقه (60000 میلی‌ثانیه)
             setTimeout(() => {
-                // بررسی کنید که آیا فایل وجود دارد و آن را حذف کنید
-                if (fs.existsSync(fileName)) {
-                    fs.unlinkSync(fileName); // حذف فایل
-                    console.log(`فایل ${fileName} حذف شد.`);
-                }
+                console.log(`فایل ${fileUrl} پس از 1 دقیقه قابل حذف است، اما فایل در GitHub حذف نمی‌شود.`);
             }, 60000); // 1 دقیقه
         })
         .catch((error) => {
