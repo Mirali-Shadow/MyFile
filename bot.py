@@ -5,7 +5,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, Ca
 # توکن بات شما
 TOKEN = "6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs"
 CHANNEL_USERNAME = "@mirali_vibe"  # نام کاربری کانال شما
-SUPPORT_CHAT_ID = "MiRALi_OFFiCiAL"  # شناسه چت شما برای دریافت پیام‌های پشتیبانی
+SUPPORT_CHAT_ID = "@MiRALi_OFFiCiAL"  # شناسه چت شما برای دریافت پیام‌های پشتیبانی
 
 # تابع برای ارسال فایل
 async def send_file(user_id: int, context: CallbackContext):
