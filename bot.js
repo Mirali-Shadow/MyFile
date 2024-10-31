@@ -6,7 +6,7 @@ const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
 const bot = new TelegramBot(token, { polling: true });
 
 // شناسه کانال مورد نظر (باید با '@' شروع شود)
-const channelId = '@YOUR_CHANNEL_ID'; // به جای YOUR_CHANNEL_ID، نام کانال خود را قرار دهید
+const channelId = 'mirali_vibe'; // به جای YOUR_CHANNEL_ID، نام کانال خود را قرار دهید
 
 // کد برای دریافت لینک اختصاصی و ارسال پیام
 bot.onText(/\/start/, (msg) => {
