@@ -15,8 +15,7 @@ async def start(update: Update, context: CallbackContext) -> None:
 # تابع برای ارسال فایل دوم
 async def get_file_2(update: Update, context: CallbackContext) -> None:
     user_id = update.effective_chat.id  # دریافت شناسه کاربر
-    user_link = f"https://t.me/c/{user_id}"  # ساخت لینک کاربر
-    print(f"در حال ارسال فایل به کاربر با شناسه: {user_id}... لینک: {user_link}")  # چاپ شناسه کاربر و لینک
+    print(f"در حال ارسال فایل به کاربر با شناسه: {user_id}...")  # چاپ شناسه کاربر
     try:
         # باز کردن فایل با مسیر مشخص شده
         with open("/workspaces/MyFile/Seft (Djsajjad1 & BLH Remix).mp3", 'rb') as file:
