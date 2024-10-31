@@ -28,14 +28,15 @@ async def receive_user_id(update: Update, context: CallbackContext) -> None:
     print(f"در حال ارسال فایل به کاربر با شناسه: {user_id}...")  # چاپ شناسه کاربر
     try:
         file_path = "/workspaces/MyFile/Seft (Djsajjad1 & BLH Remix).mp3"
-        with open(file_path, 'rb') as file:
-            await context.bot.send_document(chat_id=user_id, document=file)
+        # ارسال فایل و ذخیره شناسه پیام
+        message = await context.bot.send_document(chat_id=user_id, document=open(file_path, 'rb'))
         
         await context.bot.send_message(chat_id=user_id, text="فایل ارسال شد. این فایل بعد از 1 دقیقه پاک خواهد شد.")
+        
         await asyncio.sleep(60)  # مکث به مدت 60 ثانیه
         
-        os.remove(file_path)  # حذف فایل
-        print("فایل پاک شد.")
+        await context.bot.delete_message(chat_id=user_id, message_id=message.message_id)  # حذف پیام حاوی فایل
+        print("پیام حاوی فایل پاک شد.")
     except Exception as e:
         print(f"خطا در ارسال فایل: {e}")
         await context.bot.send_message(chat_id=user_id, text="متاسفانه ارسال فایل ناموفق بود.")
