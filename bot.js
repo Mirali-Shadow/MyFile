@@ -1,90 +1,51 @@
+// کتابخانه مورد نیاز را وارد کنید
 const TelegramBot = require('node-telegram-bot-api');
-const path = require('path');
+const fs = require('fs');
 
-// توکن ربات شما
+// توکن ربات خود را جایگزین کنید
 const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
+
+// یک نمونه از ربات ایجاد کنید
 const bot = new TelegramBot(token, { polling: true });
 
-// شناسه کانال مورد نظر (باید با '@' شروع شود)
-const channelId = 'mirali_vibe'; // به جای YOUR_CHANNEL_ID، نام کانال خود را قرار دهید
+// نام فایلی که می‌خواهید ارسال کنید را مشخص کنید
+const fileName = 'Seft (Djsajjad1 & BLH Remix).mp3'; // نام فایل را به دلخواه تغییر دهید
 
-// کد برای دریافت لینک اختصاصی و ارسال پیام
+// لینک خاصی که کاربران روی آن کلیک می‌کنند
+const specialLink = 'https://t.me/Shadow_byte_Bot?start=n2s1ds2d2s7d545s'; // لینک واقعی خود را جایگزین کنید
+
+// گوش دادن به پیام‌ها
 bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'برای دریافت فایل باید عضو کانال شوید. آیا می‌خواهید به کانال بپیوندید؟', {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: 'عضو کانال شوید',
-            url: `https://t.me/${channelId}`,
-          },
-        ],
-        [
-          {
-            text: 'بررسی عضویت',
-            callback_data: 'check_membership',
-          },
-        ],
-      ],
-    },
-  });
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, `خوش آمدید! برای دریافت فایل خود اینجا کلیک کنید: ${specialLink}`);
 });
 
-// بررسی عضویت کاربر در کانال
-bot.on('callback_query', async (query) => {
-  const chatId = query.from.id; // شناسه کاربر
+// تابعی برای ارسال فایل
+function sendFile(chatId) {
+    // ارسال فایل به کاربر
+    bot.sendDocument(chatId, fileName)
+        .then(() => {
+            console.log(`فایل به ${chatId} ارسال شد`);
 
-  if (query.data === 'check_membership') {
-    try {
-      const memberStatus = await bot.getChatMember(channelId, chatId); // بررسی وضعیت عضویت
-
-      // بررسی وضعیت عضویت
-      if (memberStatus.status === 'member' || memberStatus.status === 'administrator' || memberStatus.status === 'creator') {
-        // اگر کاربر عضو کانال بود، فایل را در قالب پیام شیشه‌ای ارسال کنید
-        const filePath = path.join(__dirname, 'Gang Vaghei (BLH Remix).mp3'); // مسیر فایل
-        bot.sendAudio(chatId, filePath, {
-          caption: 'شما فایل را دریافت کردید!',
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: 'بازگشت به منو',
-                  callback_data: 'go_back',
-                },
-              ],
-            ],
-          },
+            // بعد از 1 دقیقه (60000 میلی‌ثانیه) فایل را حذف کنید
+            setTimeout(() => {
+                // بررسی کنید که آیا فایل وجود دارد و آن را حذف کنید
+                if (fs.existsSync(fileName)) {
+                    fs.unlinkSync(fileName); // حذف فایل
+                    console.log(`فایل ${fileName} حذف شد.`);
+                }
+            }, 60000); // 1 دقیقه
+        })
+        .catch((error) => {
+            console.error(`خطا در ارسال فایل: ${error}`);
         });
-      } else {
-        // اگر کاربر عضو کانال نبود
-        bot.sendMessage(chatId, 'شما هنوز عضو کانال نشده‌اید.');
-      }
-    } catch (error) {
-      console.error(error);
-      bot.sendMessage(chatId, 'خطا در بررسی عضویت. لطفاً دوباره امتحان کنید.');
-    }
-  }
+}
 
-  // مدیریت دکمه "بازگشت به منو"
-  if (query.data === 'go_back') {
-    bot.sendMessage(chatId, 'برای دریافت فایل باید عضو کانال شوید. آیا می‌خواهید به کانال بپیوندید؟', {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: 'عضو کانال شوید',
-              url: `https://t.me/${channelId}`,
-            },
-          ],
-          [
-            {
-              text: 'بررسی عضویت',
-              callback_data: 'check_membership',
-            },
-          ],
-        ],
-      },
-    });
-  }
+// مدیریت کلیک روی لینک خاص
+bot.onText(/\/getfile/, (msg) => {
+    const chatId = msg.chat.id;
+    sendFile(chatId); // فراخوانی تابع برای ارسال فایل
 });
+
+// شروع ربات
+console.log('ربات در حال اجراست...');
