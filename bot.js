@@ -17,17 +17,12 @@ bot.onText(/\/start/, (msg) => {
     bot.sendMessage(chatId, 'سلام! خوش آمدید به ربات ما!');
 });
 
-// مدیریت دستور start با پارامتر
+// مدیریت پیام‌ها
 bot.on('message', (msg) => {
     const chatId = msg.chat.id;
-    if (msg.text && msg.text.startsWith('/start')) {
-        const params = msg.text.split(' '); // جدا کردن پارامترها
-        if (params[1] === 'getfile') {
-            sendFile(chatId); // ارسال فایل اگر پارامتر getfile باشد
-        }
-    } else if (msg.text === 'https://t.me/shadow_byte_bot?start=getfile') {
-        // ارسال فایل بلافاصله با کلیک بر روی لینک اختصاصی
-        sendFile(chatId); // ارسال فایل بلافاصله
+    // اگر پیام حاوی لینک اختصاصی باشد، فقط فایل ارسال شود
+    if (msg.text === 'https://t.me/shadow_byte_bot?start=getfile') {
+        sendFile(chatId); // ارسال فایل بدون هیچ پیام
     }
 });
 
