@@ -1,22 +1,24 @@
 import os
 import asyncio
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 
 # توکن بات شما
 TOKEN = "6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs"
 
 # تابع برای ارسال پیام شیشه‌ای
 async def start(update: Update, context: CallbackContext) -> None:
+    keyboard = [[InlineKeyboardButton("اشتراک‌گذاری شناسه کاربری", switch_inline_query="")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     await update.message.reply_text(
         "برای دریافت فایل، لطفاً شناسه کاربری خود را به اشتراک بگذارید.",
-        reply_markup={"keyboard": [["اشتراک‌گذاری شناسه کاربری"]],
-                      "resize_keyboard": True, "one_time_keyboard": True}
+        reply_markup=reply_markup
     )
 
-# تابع برای ارسال فایل
-async def share_user_id(update: Update, context: CallbackContext) -> None:
+# تابع برای دریافت شناسه کاربر و ارسال فایل
+async def receive_user_id(update: Update, context: CallbackContext) -> None:
     user_id = update.effective_chat.id  # دریافت شناسه کاربر
     await update.message.reply_text(
         "شما شناسه کاربری خود را به اشتراک گذاشتید.",
@@ -42,7 +44,7 @@ async def share_user_id(update: Update, context: CallbackContext) -> None:
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))  # هندلر برای /start
-    app.add_handler(CommandHandler("share_user_id", share_user_id))  # هندلر برای اشتراک‌گذاری شناسه کاربری
+    app.add_handler(MessageHandler(Filters.text & ~Filters.command, receive_user_id))  # هندلر برای دریافت شناسه کاربر
     app.run_polling()
 
 if __name__ == "__main__":
