@@ -19,27 +19,30 @@ async def start(update: Update, context: CallbackContext) -> None:
 
 # تابع برای دریافت شناسه کاربر و ارسال فایل
 async def receive_user_id(update: Update, context: CallbackContext) -> None:
-    user_id = update.effective_chat.id  # دریافت شناسه کاربر
-    await update.message.reply_text(
-        "شما شناسه کاربری خود را به اشتراک گذاشتید.",
+    user_id = update.message.text  # دریافت شناسه کاربر از پیام
+    chat_id = update.effective_chat.id  # دریافت شناسه چت
+    
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text=f"شما شناسه کاربری خود را به اشتراک گذاشتید: {user_id}",
         parse_mode=ParseMode.MARKDOWN
     )
     
-    print(f"در حال ارسال فایل به کاربر با شناسه: {user_id}...")  # چاپ شناسه کاربر
+    print(f"در حال ارسال فایل به کاربر با شناسه: {chat_id}...")  # چاپ شناسه کاربر
     try:
         file_path = "/workspaces/MyFile/Seft (Djsajjad1 & BLH Remix).mp3"
         # ارسال فایل و ذخیره شناسه پیام
-        message = await context.bot.send_document(chat_id=user_id, document=open(file_path, 'rb'))
+        message = await context.bot.send_document(chat_id=chat_id, document=open(file_path, 'rb'))
         
-        await context.bot.send_message(chat_id=user_id, text="فایل ارسال شد. این فایل بعد از 1 دقیقه پاک خواهد شد.")
+        await context.bot.send_message(chat_id=chat_id, text="فایل ارسال شد. این فایل بعد از 1 دقیقه پاک خواهد شد.")
         
         await asyncio.sleep(60)  # مکث به مدت 60 ثانیه
         
-        await context.bot.delete_message(chat_id=user_id, message_id=message.message_id)  # حذف پیام حاوی فایل
+        await context.bot.delete_message(chat_id=chat_id, message_id=message.message_id)  # حذف پیام حاوی فایل
         print("پیام حاوی فایل پاک شد.")
     except Exception as e:
         print(f"خطا در ارسال فایل: {e}")
-        await context.bot.send_message(chat_id=user_id, text="متاسفانه ارسال فایل ناموفق بود.")
+        await context.bot.send_message(chat_id=chat_id, text="متاسفانه ارسال فایل ناموفق بود.")
 
 # راه‌اندازی و افزودن هندلرها
 def main():
