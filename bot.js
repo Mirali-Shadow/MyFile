@@ -1,33 +1,26 @@
-// بارگذاری ماژول‌های لازم
 const TelegramBot = require('node-telegram-bot-api');
-const path = require('path');
-const fs = require('fs');
 
-// توکن ربات خود را در اینجا وارد کنید
+// توکن ربات خود را در اینجا قرار دهید
 const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
-
-// ایجاد یک ربات با حالت polling
 const bot = new TelegramBot(token, { polling: true });
 
-// در صورتی که کاربر ربات را استارت کند
+// زمانی که کاربر ربات را شروع می‌کند
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
+    const welcomeMessage = `به ربات Shadow Rap خوش اومدید.\nبرای راهنمایی های بیشتر دستور /help رو بفرستید.`;
+    bot.sendMessage(chatId, welcomeMessage);
+});
 
-    // مسیر فایل xfile را تنظیم کنید
-    const filePath = path.join(__dirname, 'xfile'); // فرض می‌کنیم xfile در همان پوشه است
+// زمانی که کاربر دستور /help را می‌فرستد
+bot.onText(/\/help/, (msg) => {
+    const chatId = msg.chat.id;
+    const helpMessage = `این ربات به شما کمک می‌کند تا موزیک‌های مورد علاقه‌تان را به اشتراک بگذارید.\n\nدستورها:\n/start - شروع مکالمه با ربات\n/help - نمایش این راهنما`;
+    bot.sendMessage(chatId, helpMessage);
+});
 
-    // بررسی اینکه آیا فایل وجود دارد
-    if (fs.existsSync(filePath)) {
-        // ارسال فایل به کاربر
-        bot.sendDocument(chatId, filePath)
-            .then(() => {
-                bot.sendMessage(chatId, 'فایل xfile ارسال شد!');
-            })
-            .catch((error) => {
-                console.error('خطا در ارسال فایل:', error);
-                bot.sendMessage(chatId, 'متاسفانه خطایی در ارسال فایل رخ داد.');
-            });
-    } else {
-        bot.sendMessage(chatId, 'فایل xfile پیدا نشد.');
-    }
+// ارسال فایل xfile
+bot.onText(/\/sendfile/, (msg) => {
+    const chatId = msg.chat.id;
+    const filePath = './xfile'; // مسیر فایل شما
+    bot.sendDocument(chatId, filePath);
 });
