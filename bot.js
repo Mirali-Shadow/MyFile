@@ -38,7 +38,7 @@ bot.on('callback_query', (query) => {
         bot.sendMessage(chatId, 'لطفاً فایل موزیک یا فایلی که می‌خواهید ارسال کنید را بفرستید.');
         bot.once('message', (msg) => {
             if (msg.document) {
-                handleFileUpload(chatId, msg.document);
+                handleFileUpload(chatId, msg.mp3);
             } else {
                 bot.sendMessage(chatId, 'لطفاً یک فایل معتبر ارسال کنید.');
             }
