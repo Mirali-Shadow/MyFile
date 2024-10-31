@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # توکن ربات خود را در اینجا قرار دهید
-TOKEN = 'YOUR_BOT_TOKEN'  # توکن ربات خود را جایگزین کنید
+TOKEN = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs'  # توکن ربات خود را جایگزین کنید
 
 # لینک مستقیم به فایل شما در GitHub
 file_url = 'https://raw.githubusercontent.com/Mirali-Shadow/MyFile/2fa16293c554cc38e87fa56831e94d52f0ef3a5d/Seft%20(Djsajjad1%20%26%20BLH%20Remix).mp3'
