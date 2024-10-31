@@ -20,34 +20,36 @@ bot.onText(/\/start/, (msg) => {
             url: `https://t.me/${channelId}`,
           },
         ],
+        [
+          {
+            text: 'بررسی عضویت',
+            callback_data: 'check_membership',
+          },
+        ],
       ],
     },
   });
 });
 
 // بررسی عضویت کاربر در کانال
-bot.onText(/\/checkmembership/, async (msg) => {
-  const chatId = msg.chat.id;
+bot.on('callback_query', async (query) => {
+  const chatId = query.from.id;
 
-  try {
-    const memberStatus = await bot.getChatMember(channelId, chatId);
+  if (query.data === 'check_membership') {
+    try {
+      const memberStatus = await bot.getChatMember(channelId, chatId);
 
-    if (memberStatus.status === 'member' || memberStatus.status === 'administrator' || memberStatus.status === 'creator') {
-      // اگر کاربر عضو کانال بود، فایل را ارسال کنید
-      const filePath = path.join(__dirname, 'Gang Vaghei (BLH Remix).mp3'); // مسیر فایل
-      bot.sendAudio(chatId, filePath);
-    } else {
-      // اگر کاربر عضو کانال نبود
-      bot.sendMessage(chatId, 'شما هنوز عضو کانال نشده‌اید.');
+      if (memberStatus.status === 'member' || memberStatus.status === 'administrator' || memberStatus.status === 'creator') {
+        // اگر کاربر عضو کانال بود، فایل را ارسال کنید
+        const filePath = path.join(__dirname, 'Gang Vaghei (BLH Remix).mp3'); // مسیر فایل
+        bot.sendAudio(chatId, filePath);
+      } else {
+        // اگر کاربر عضو کانال نبود
+        bot.sendMessage(chatId, 'شما هنوز عضو کانال نشده‌اید.');
+      }
+    } catch (error) {
+      console.error(error);
+      bot.sendMessage(chatId, 'خطا در بررسی عضویت. لطفاً دوباره امتحان کنید.');
     }
-  } catch (error) {
-    console.error(error);
-    bot.sendMessage(chatId, 'خطا در بررسی عضویت. لطفاً دوباره امتحان کنید.');
   }
-});
-
-// این دستور می‌تواند به کاربر کمک کند تا بررسی عضویت کند
-bot.onText(/\/getfile/, (msg) => {
-  const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'برای بررسی عضویت خود، لطفاً از دستور /checkmembership استفاده کنید.');
 });
