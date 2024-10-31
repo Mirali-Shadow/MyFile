@@ -12,7 +12,7 @@ const bot = new TelegramBot(token, { polling: true });
 const fileUrl = 'https://raw.githubusercontent.com/Mirali-Shadow/MyFile/2fa16293c554cc38e87fa56831e94d52f0ef3a5d/Seft%20(Djsajjad1%20%26%20BLH%20Remix).mp3';
 
 // لینک خاصی که کاربران روی آن کلیک می‌کنند
-const specialLink = 'https://t.me/Shadow_byte_bot?start=getfile'; // نام کاربری ربات خود را وارد کنید
+const specialLink = 'https://t.me/Shadow_byte_bot?start=kh3sdg1fd51gx'; // نام کاربری ربات خود را وارد کنید
 
 // گوش دادن به پیام‌ها
 bot.onText(/\/start/, (msg) => {
