@@ -6,7 +6,7 @@ const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
 const bot = new TelegramBot(token, { polling: true });
 
 // شناسه کانال مورد نظر (باید با '@' شروع شود)
-const channelId = 'mirali_vibe';
+const channelId = '@YOUR_CHANNEL_ID'; // به جای YOUR_CHANNEL_ID، نام کانال خود را قرار دهید
 
 // کد برای دریافت لینک اختصاصی و ارسال پیام
 bot.onText(/\/start/, (msg) => {
@@ -31,25 +31,4 @@ bot.onText(/\/start/, (msg) => {
   });
 });
 
-// بررسی عضویت کاربر در کانال
-bot.on('callback_query', async (query) => {
-  const chatId = query.from.id;
-
-  if (query.data === 'check_membership') {
-    try {
-      const memberStatus = await bot.getChatMember(channelId, chatId);
-
-      if (memberStatus.status === 'member' || memberStatus.status === 'administrator' || memberStatus.status === 'creator') {
-        // اگر کاربر عضو کانال بود، فایل را ارسال کنید
-        const filePath = path.join(__dirname, 'Gang Vaghei (BLH Remix).mp3'); // مسیر فایل
-        bot.sendAudio(chatId, filePath);
-      } else {
-        // اگر کاربر عضو کانال نبود
-        bot.sendMessage(chatId, 'شما هنوز عضو کانال نشده‌اید.');
-      }
-    } catch (error) {
-      console.error(error);
-      bot.sendMessage(chatId, 'خطا در بررسی عضویت. لطفاً دوباره امتحان کنید.');
-    }
-  }
-});
+// بررسی
