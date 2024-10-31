@@ -5,7 +5,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, Me
 
 # توکن بات شما
 TOKEN = "6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs"
-CHANNEL_USERNAME = "@mirali_vibe"  # نام کاربری کانال شما را در اینجا قرار دهید
+CHANNEL_USERNAME = "mirali_vibe"  # نام کاربری کانال بدون @
 
 # تابع برای ارسال پیام خوش آمدگویی
 async def start(update: Update, context: CallbackContext) -> None:
