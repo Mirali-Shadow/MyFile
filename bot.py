@@ -1,6 +1,7 @@
 import os
 import asyncio
-from telegram import Update, ParseMode
+from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext
 
 # توکن بات شما
