@@ -24,32 +24,32 @@ async def send_join_request(update: Update, context: CallbackContext) -> None:
     keyboard = [
         [InlineKeyboardButton("عضویت در کانال", url="https://t.me/mirali_vibe")],
         [InlineKeyboardButton("تایید عضویت", callback_data='confirm_membership')],
-        [InlineKeyboardButton("پشتیبانی", url="https://t.me/mirali_official")]  # لینک پشتیبانی
+        [InlineKeyboardButton(" ارتباط با پشتیبانی ", url="https://t.me/mirali_official")],
+
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
-        "لطفاً به کانال ما بپیوندید و پس از عضویت دکمه زیر را فشار دهید.",
+        "لطفاً ابتدا در کانال ما عضو شوید و سپس دکمه تایید عضویت را بزنید.",
         reply_markup=reply_markup
     )
 
 async def check_membership(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
-    await query.answer()  # پاسخ به callback query
+    await query.answer()
 
     user_id = query.from_user.id
 
     try:
-        # چک کردن وضعیت عضویت کاربر
+        # بررسی وضعیت عضویت کاربر
         chat_member = await context.bot.get_chat_member(CHANNEL_USERNAME, user_id)
 
-        # اگر کاربر عضو کانال باشد
         if chat_member.status in ['member', 'administrator', 'creator']:
-            joined_users.add(user_id)  # اضافه کردن کاربر به لیست کاربران عضو
+            joined_users.add(user_id)  # ذخیره کاربر به عنوان عضو کانال
             await query.message.reply_text("شما در کانال عضو هستید. فایل ارسال خواهد شد.")
-            await send_file(user_id, context, "Pishro - Tamum Shode (featuring Kamyar).mp3")  # ارسال فایل به صورت پیش‌فرض
+            await send_file(user_id, context, "Pishro - Tamum Shode (featuring Kamyar).mp3")
         else:
-            await send_join_request(update, context)
+            await query.message.reply_text("شما هنوز عضو کانال نیستید. لطفاً عضو شوید و دوباره امتحان کنید.")
     except Exception as e:
         print(f"خطا در بررسی عضویت: {str(e)}")
         await query.message.reply_text(f"خطا در بررسی عضویت: {str(e)}")
@@ -57,24 +57,19 @@ async def check_membership(update: Update, context: CallbackContext) -> None:
 async def start(update: Update, context: CallbackContext) -> None:
     user_id = update.message.from_user.id
 
-    # اگر کاربر قبلاً عضو بوده اما اکنون خارج شده است
-    if user_id in joined_users:
-        chat_member = await context.bot.get_chat_member(CHANNEL_USERNAME, user_id)
-        if chat_member.status not in ['member', 'administrator', 'creator']:
-            joined_users.remove(user_id)
-            await update.message.reply_text("شما از کانال خارج شده‌اید. لطفاً برای ادامه استفاده از ربات، دوباره عضو شوید.")
-            await send_join_request(update, context)
-            return
-
-    # بررسی پارامتر استارت
-    if context.args:
-        file_key = context.args[0].lower()
-        if file_key in file_links:
-            await send_file(update.message.chat.id, context, file_links[file_key])
-        else:
-            await update.message.reply_text("فایل مورد نظر موجود نیست.")
+    # چک کردن وضعیت عضویت کاربر
+    if user_id not in joined_users:
+        await send_join_request(update, context)
     else:
-        await update.message.reply_text("به ربات آپلودر ShadowRap خوش اومدید.\nسعی کنید نسبت به قبل تغییر زیادی نداشته باشید.")
+        # بررسی پارامتر استارت برای ارسال فایل مورد نظر
+        if context.args:
+            file_key = context.args[0].lower()
+            if file_key in file_links:
+                await send_file(update.message.chat.id, context, file_links[file_key])
+            else:
+                await update.message.reply_text("فایل مورد نظر موجود نیست.")
+        else:
+            await update.message.reply_text("به ربات آپلودر ShadowRap خوش اومدید.")
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
