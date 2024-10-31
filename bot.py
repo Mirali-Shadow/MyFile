@@ -1,4 +1,5 @@
 import os
+import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, CallbackQueryHandler
 
@@ -17,14 +18,24 @@ joined_users = set()
 
 async def send_file(user_id: int, context: CallbackContext, file_name: str):
     file_path = f"/workspaces/MyFile/{file_name}"
-    await context.bot.send_document(chat_id=user_id, document=open(file_path, 'rb'))
-    await context.bot.send_message(chat_id=user_id, text=" فایل رو در جایی ذخیره کنید .\n فایل های ارسالی بعد از 60 ثانیه پاک خواهند شد ! ")
+    
+    # ارسال فایل و دریافت پیام ارسالی
+    message = await context.bot.send_document(chat_id=user_id, document=open(file_path, 'rb'))
+    await context.bot.send_message(chat_id=user_id, text="فایل رو در جایی ذخیره کنید.\n فایل‌های ارسالی بعد از 60 ثانیه پاک خواهند شد!")
+    
+    # تاخیر 60 ثانیه‌ای
+    await asyncio.sleep(60)
+    
+    # حذف فایل از پیام
+    await context.bot.delete_message(chat_id=user_id, message_id=message.message_id)
+    # اطلاع‌رسانی حذف فایل
+    await context.bot.send_message(chat_id=user_id, text="⚠️ فایل حذف شد. اگر دوباره نیاز به فایل دارید، لطفاً درخواست دهید.")
 
 async def send_join_request(update: Update, context: CallbackContext) -> None:
     keyboard = [
         [InlineKeyboardButton("عضویت در کانال", url="https://t.me/mirali_vibe")],
         [InlineKeyboardButton("تایید عضویت", callback_data='confirm_membership')],
-        [InlineKeyboardButton(" ارتباط با پشتیبانی ", url="https://t.me/mirali_official")]
+        [InlineKeyboardButton("ارتباط با پشتیبانی", url="https://t.me/mirali_official")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -60,6 +71,7 @@ async def start(update: Update, context: CallbackContext) -> None:
         chat_member = await context.bot.get_chat_member(CHANNEL_USERNAME, user_id)
         if chat_member.status in ['member', 'administrator', 'creator']:
             joined_users.add(user_id)  # ذخیره کاربر به عنوان عضو کانال
+            
             # بررسی پارامتر استارت برای ارسال فایل مورد نظر
             if context.args:
                 file_key = context.args[0].lower()
