@@ -24,11 +24,15 @@ bot.on('message', (msg) => {
     // چک کردن آیا پیام شامل لینک اختصاصی است
     if (msg.text === 'https://t.me/shadow_byte_bot?start=getfile') {
         // اگر لینک درست بود، فایل ارسال شود
-        bot.sendDocument(chatId, fileUrl).then(() => {
-            console.log(`فایل به ${chatId} ارسال شد`);
-        }).catch((error) => {
-            console.error(`خطا در ارسال فایل: ${error}`);
-        });
+        bot.sendDocument(chatId, fileUrl)
+            .then(() => {
+                console.log(`فایل به ${chatId} ارسال شد`);
+                // هیچ پیامی در اینجا ارسال نمی‌شود
+            })
+            .catch((error) => {
+                console.error(`خطا در ارسال فایل: ${error}`);
+                // می‌توانید در صورت نیاز پیامی ارسال کنید
+            });
     }
 });
 
