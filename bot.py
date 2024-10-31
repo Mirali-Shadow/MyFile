@@ -2,7 +2,7 @@ import os
 import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, MessageHandler, filters
 
 # توکن بات شما
 TOKEN = "6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs"
@@ -44,7 +44,7 @@ async def receive_user_id(update: Update, context: CallbackContext) -> None:
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))  # هندلر برای /start
-    app.add_handler(MessageHandler(Filters.text & ~Filters.command, receive_user_id))  # هندلر برای دریافت شناسه کاربر
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, receive_user_id))  # هندلر برای دریافت شناسه کاربر
     app.run_polling()
 
 if __name__ == "__main__":
