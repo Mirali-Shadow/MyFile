@@ -9,7 +9,7 @@ const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
 const bot = new TelegramBot(token, { polling: true });
 
 // نام فایلی که می‌خواهید ارسال کنید را مشخص کنید
-const fileName = 'Seft (Djsajjad1 & BLH Remix).mp3'; // نام فایل را به دلخواه تغییر دهید
+const fileName = 'benz.mp3'; // نام فایل را به دلخواه تغییر دهید
 
 // لینک خاصی که کاربران روی آن کلیک می‌کنند
 const specialLink = 'https://t.me/Shadow_byte_Bot?start=n2s1ds2d2s7d545s'; // لینک واقعی خود را جایگزین کنید
