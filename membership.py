@@ -1,16 +1,9 @@
-import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, CallbackQueryHandler
+from telegram.ext import CallbackContext
 
-# توکن بات شما
-TOKEN = "6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs"
+from bot import send_file
+
 CHANNEL_USERNAME = "@mirali_vibe"  # نام کاربری کانال شما
-
-# تابع برای ارسال فایل
-async def send_file(user_id: int, context: CallbackContext):
-    file_path = "/workspaces/MyFile/Gang Vaghei (BLH Remix).mp3"
-    await context.bot.send_document(chat_id=user_id, document=open(file_path, 'rb'))
-    await context.bot.send_message(chat_id=user_id, text="فایل ارسال شد.")
 
 # تابع برای ارسال لینک عضویت
 async def send_join_request(update: Update, context: CallbackContext) -> None:
@@ -42,17 +35,3 @@ async def check_membership(update: Update, context: CallbackContext) -> None:
     except Exception as e:
         print(f"خطا در بررسی عضویت: {str(e)}")
         await query.message.reply_text(f"خطا در بررسی عضویت: {str(e)}")
-
-# تابع شروع
-async def start(update: Update, context: CallbackContext) -> None:
-    await send_join_request(update, context)
-
-# راه‌اندازی و افزودن هندلرها
-def main():
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))  # هندلر برای /start
-    app.add_handler(CallbackQueryHandler(check_membership, pattern='^confirm_membership$'))  # هندلر برای تایید عضویت
-    app.run_polling()
-
-if __name__ == "__main__":
-    main()
