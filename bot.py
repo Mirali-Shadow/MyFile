@@ -19,13 +19,12 @@ def handle_message(update: Update, context: CallbackContext):
     if update.message.text == 'https://t.me/shadow_byte_bot?start=getfile':
         # ارسال فایل به کاربر
         context.bot.send_document(chat_id, file_url)
-        # هیچ پیامی در اینجا ارسال نمی‌شود
 
 # تابع اصلی برای اجرای ربات
 def main():
-    # ایجاد آپدیت و دریافت
-    updater = Updater(TOKEN, use_context=True)
-    
+    # ایجاد آپدیت و دریافت بدون استفاده از use_context
+    updater = Updater(TOKEN)
+
     # ثبت هندلرها
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
