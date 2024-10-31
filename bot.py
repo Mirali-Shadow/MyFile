@@ -18,7 +18,7 @@ joined_users = set()
 async def send_file(user_id: int, context: CallbackContext, file_name: str):
     file_path = f"/workspaces/MyFile/{file_name}"
     await context.bot.send_document(chat_id=user_id, document=open(file_path, 'rb'))
-    await context.bot.send_message(chat_id=user_id, text="فایل ارسال شد.")
+    await context.bot.send_message(chat_id=user_id, text=" فایل رو در جایی ذخیره کنید .\n فایل های ارسالی بعد از 60 ثانیه پاک خواهند شد ! ")
 
 async def send_join_request(update: Update, context: CallbackContext) -> None:
     keyboard = [
