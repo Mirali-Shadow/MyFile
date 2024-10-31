@@ -46,7 +46,7 @@ bot.on('message', (msg) => {
     // بررسی نوع پیام
     if (msg.text.startsWith('دانلود موزیک')) {
         const trackNumber = msg.text.split(' ')[2]; // شماره موزیک
-        const filePath = path.join(__dirname, `benz${trackNumber}.mp3`); // فرض بر این است که موزیک‌ها به این صورت نام‌گذاری شده‌اند
+        const filePath = path.join(__dirname, `Gang Vaghei (BLH Remix)${trackNumber}.mp3`); // فرض بر این است که موزیک‌ها به این صورت نام‌گذاری شده‌اند
 
         if (fs.existsSync(filePath)) {
             // ارسال موزیک
