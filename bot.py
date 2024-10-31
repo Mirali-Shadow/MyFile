@@ -14,15 +14,16 @@ async def start(update: Update, context: CallbackContext) -> None:
 
 # تابع برای ارسال فایل دوم
 async def get_file_2(update: Update, context: CallbackContext) -> None:
-    print("در حال ارسال فایل از لینک getfile2...")
+    user_id = update.effective_chat.id  # دریافت شناسه کاربر
+    print(f"در حال ارسال فایل به کاربر با شناسه: {user_id}...")  # چاپ شناسه کاربر
     try:
         # باز کردن فایل با مسیر مشخص شده
         with open("/workspaces/MyFile/Seft (Djsajjad1 & BLH Remix).mp3", 'rb') as file:
-            await context.bot.send_document(chat_id=update.effective_chat.id, document=file)
+            await context.bot.send_document(chat_id=user_id, document=file)
         print("فایل ارسال شد.")
     except Exception as e:
         print(f"خطا در ارسال فایل: {e}")
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="متاسفانه ارسال فایل ناموفق بود.")
+        await context.bot.send_message(chat_id=user_id, text="متاسفانه ارسال فایل ناموفق بود.")
 
 # راه‌اندازی و افزودن هندلرها
 def main():
