@@ -31,4 +31,60 @@ bot.onText(/\/start/, (msg) => {
   });
 });
 
-// بررسی
+// بررسی عضویت کاربر در کانال
+bot.on('callback_query', async (query) => {
+  const chatId = query.from.id; // شناسه کاربر
+
+  if (query.data === 'check_membership') {
+    try {
+      const memberStatus = await bot.getChatMember(channelId, chatId); // بررسی وضعیت عضویت
+
+      // بررسی وضعیت عضویت
+      if (memberStatus.status === 'member' || memberStatus.status === 'administrator' || memberStatus.status === 'creator') {
+        // اگر کاربر عضو کانال بود، فایل را در قالب پیام شیشه‌ای ارسال کنید
+        const filePath = path.join(__dirname, 'Gang Vaghei (BLH Remix).mp3'); // مسیر فایل
+        bot.sendAudio(chatId, filePath, {
+          caption: 'شما فایل را دریافت کردید!',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'بازگشت به منو',
+                  callback_data: 'go_back',
+                },
+              ],
+            ],
+          },
+        });
+      } else {
+        // اگر کاربر عضو کانال نبود
+        bot.sendMessage(chatId, 'شما هنوز عضو کانال نشده‌اید.');
+      }
+    } catch (error) {
+      console.error(error);
+      bot.sendMessage(chatId, 'خطا در بررسی عضویت. لطفاً دوباره امتحان کنید.');
+    }
+  }
+
+  // مدیریت دکمه "بازگشت به منو"
+  if (query.data === 'go_back') {
+    bot.sendMessage(chatId, 'برای دریافت فایل باید عضو کانال شوید. آیا می‌خواهید به کانال بپیوندید؟', {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: 'عضو کانال شوید',
+              url: `https://t.me/${channelId}`,
+            },
+          ],
+          [
+            {
+              text: 'بررسی عضویت',
+              callback_data: 'check_membership',
+            },
+          ],
+        ],
+      },
+    });
+  }
+});
