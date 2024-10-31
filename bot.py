@@ -5,7 +5,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 TOKEN = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs'  # توکن ربات شما
 
 # لینک مستقیم به فایل شما در GitHub
-file_url = 'https://raw.githubusercontent.com/Mirali-Shadow/MyFile/2fa16293c554cc38e87fa56831e94d52f0ef3a5d/Seft%20(Djsajjad1%20%26%20BLH%20Remix).mp3'
+file_url = 'https://github.com/MIRALILOR/MyFile/blob/d19550a1a44891fc9dff7f485d80df17e60f0412/MyMusic/Niloofar%20Abi.mp3'
 
 # تابعی برای ارسال سلام هنگام استارت ربات
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
