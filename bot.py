@@ -21,13 +21,15 @@ async def send_file(user_id: int, context: CallbackContext, file_name: str):
     
     # ارسال فایل و دریافت پیام ارسالی
     message = await context.bot.send_document(chat_id=user_id, document=open(file_path, 'rb'))
-    await context.bot.send_message(chat_id=user_id, text="فایل رو در جایی ذخیره کنید.\n فایل‌های ارسالی بعد از 60 ثانیه پاک خواهند شد!")
+    message_text = await context.bot.send_message(chat_id=user_id, text="فایل رو در جایی ذخیره کنید.\n فایل‌های ارسالی بعد از 60 ثانیه پاک خواهند شد!")
     
     # تاخیر 60 ثانیه‌ای
     await asyncio.sleep(60)
     
     # حذف فایل از پیام
     await context.bot.delete_message(chat_id=user_id, message_id=message.message_id)
+    # حذف پیام هشدار
+    await context.bot.delete_message(chat_id=user_id, message_id=message_text.message_id)
     # اطلاع‌رسانی حذف فایل
     await context.bot.send_message(chat_id=user_id, text="⚠️ فایل حذف شد. اگر دوباره نیاز به فایل دارید، لطفاً درخواست دهید.")
 
