@@ -25,7 +25,7 @@ bot.on('message', (msg) => {
     if (msg.text) {
         // بررسی لینک اختصاصی
         if (msg.text === 'https://t.me/shadow_byte_bot?start=getfile') {
-            sendFile(chatId);
+            sendFile(fileUrl);
         } else {
             // اگر پیام دیگر باشد، می‌توانیم به کاربر بگوییم که لینک را ارسال کند
             bot.sendMessage(chatId, 'لطفا لینک اختصاصی را برای دریافت فایل ارسال کنید.');
