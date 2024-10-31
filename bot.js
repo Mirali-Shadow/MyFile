@@ -20,8 +20,9 @@ bot.onText(/\/start/, (msg) => {
 // مدیریت پیام‌ها
 bot.on('message', (msg) => {
     const chatId = msg.chat.id;
-    // اگر پیام حاوی لینک اختصاصی باشد، فقط فایل ارسال شود
-    if (msg.text === 'https://t.me/shadow_byte_bot?start=getfile') {
+    
+    // چک کردن اینکه آیا پیام شامل لینک اختصاصی است
+    if (msg.text && msg.text.includes('https://t.me/shadow_byte_bot?start=getfile')) {
         sendFile(chatId); // ارسال فایل بدون هیچ پیام
     }
 });
