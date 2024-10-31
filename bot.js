@@ -1,89 +1,84 @@
 const TelegramBot = require('node-telegram-bot-api');
+const fs = require('fs');
 
-// توکن ربات تلگرام خود را اینجا وارد کنید
+// Replace with your bot token
 const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
-
-// ساخت ربات
 const bot = new TelegramBot(token, { polling: true });
 
-// پیغام خوش‌آمدگویی
+// Welcome message when the bot is started
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
-    bot.sendMessage(chatId, 'به ربات Shadow Rap خوش اومدید. برای راهنمایی های بیشتر دستور /help رو بفرستید.');
-
-    // منوی شیشه‌ای دانلود موزیک و اپلود موزیک
-    const options = {
+    const welcomeMessage = "به ربات Shadow Rap خوش اومدید\nبرای راهنمایی های بیشتر دستور /help رو بفرستید";
+    bot.sendMessage(chatId, welcomeMessage, {
         reply_markup: {
-            inline_keyboard: [
-                [
-                    { text: 'دانلود موزیک', callback_data: 'download_music' },
-                    { text: 'آپلود موزیک', callback_data: 'upload_music' }
-                ]
-            ]
+            keyboard: [
+                [{ text: "دانلود موزیک" }],
+                [{ text: "اپلود موزیک" }]
+            ],
+            resize_keyboard: true,
+            one_time_keyboard: true
         }
-    };
-    bot.sendMessage(chatId, 'لطفا یکی از گزینه‌ها را انتخاب کنید:', options);
+    });
 });
 
-// راهنمای ربات
+// Help command
 bot.onText(/\/help/, (msg) => {
     const chatId = msg.chat.id;
-    const helpMessage = `
-        راهنمای ربات:
-        - برای دانلود موزیک، گزینه "دانلود موزیک" را انتخاب کنید.
-        - برای ارسال موزیک به ربات، گزینه "آپلود موزیک" را انتخاب کنید.
-    `;
+    const helpMessage = "برای دانلود موزیک، دکمه 'دانلود موزیک' را فشار دهید.\nبرای ارسال موزیک، دکمه 'اپلود موزیک' را فشار دهید.";
     bot.sendMessage(chatId, helpMessage);
 });
 
-// منوی دانلود موزیک
-bot.on('callback_query', (query) => {
-    const chatId = query.message.chat.id;
-
-    if (query.data === 'download_music') {
-        const downloadOptions = {
-            reply_markup: {
-                inline_keyboard: [
-                    [
-                        { text: 'موزیک 1', callback_data: 'send_music_1' },
-                        { text: 'موزیک 2', callback_data: 'send_music_2' },
-                    ],
-                    // می‌توانید شیشه‌های بیشتر اضافه کنید
-                ]
-            }
-        };
-        bot.sendMessage(chatId, 'لطفا موزیک مورد نظر خود را انتخاب کنید:', downloadOptions);
-    }
-
-    // ارسال موزیک
-    if (query.data === 'send_music_1') {
-        bot.sendAudio(chatId, 'Gang Vaghei (BLH Remix).mp3');
-    }
-    if (query.data === 'send_music_2') {
-        // جایگزین کنید با نام فایل موزیک
-        bot.sendAudio(chatId, 'YOUR_OTHER_MUSIC_FILE.mp3');
-    }
-});
-
-// منوی آپلود موزیک
-bot.on('callback_query', (query) => {
-    const chatId = query.message.chat.id;
-
-    if (query.data === 'upload_music') {
-        bot.sendMessage(chatId, 'لطفا فایل موزیک خود را ارسال کنید.');
-    }
-});
-
-// دریافت فایل آپلود شده
-bot.on('document', (msg) => {
+// Download music menu
+bot.onText(/دانلود موزیک/, (msg) => {
     const chatId = msg.chat.id;
-    const fileType = msg.document.mime_type;
+    bot.sendMessage(chatId, "برای دانلود موزیک 'Gang Vaghei (BLH Remix)' شما باید در کانال‌های زیر عضو شوید:", {
+        reply_markup: {
+            inline_keyboard: [
+                [
+                    { text: "کانال 1", url: "https://t.me/channel1" },
+                    { text: "کانال 2", url: "https://t.me/channel2" }
+                ],
+                [{ text: "برگشت", callback_data: "back_to_main" }]
+            ]
+        }
+    });
+});
 
-    // بررسی نوع فایل
-    if (fileType === 'audio/mpeg') {
-        bot.sendMessage(chatId, 'فایل شما دریافت شد. پس از بررسی منتشر خواهد شد.');
-        // اینجا می‌توانید کد بررسی و ذخیره فایل را اضافه کنید
-    } else {
-        bot.sendMessage(chatId, 'لطفا یک فایل معتبر ارسال کنید.');
+// Upload music menu
+bot.onText(/اپلود موزیک/, (msg) => {
+    const chatId = msg.chat.id;
+    const uploadMessage = "لطفا موزیک مورد نظر را ارسال کنید.";
+    bot.sendMessage(chatId, uploadMessage);
+});
+
+// Handle incoming audio files
+bot.on('audio', (msg) => {
+    const chatId = msg.chat.id;
+    const fileId = msg.audio.file_id;
+
+    // Download the file and send a confirmation
+    bot.downloadFile(fileId, './').then((filePath) => {
+        bot.sendMessage(chatId, "فایل با موفقیت دریافت شد.");
+    }).catch(() => {
+        bot.sendMessage(chatId, "لطفا یک فایل معتبر ارسال کنید.");
+    });
+});
+
+// Handle callback queries (for the back button)
+bot.on('callback_query', (query) => {
+    const chatId = query.message.chat.id;
+    const callbackData = query.data;
+
+    if (callbackData === 'back_to_main') {
+        bot.sendMessage(chatId, "به منوی اصلی برگشتید.", {
+            reply_markup: {
+                keyboard: [
+                    [{ text: "دانلود موزیک" }],
+                    [{ text: "اپلود موزیک" }]
+                ],
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
+        });
     }
 });
