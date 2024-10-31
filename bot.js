@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const path = require('path');
 
 // توکن ربات خود را در اینجا قرار دهید
-const token = 'YOUR_TELEGRAM_BOT_TOKEN';
+const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
 const bot = new TelegramBot(token, { polling: true });
 
 // زمانی که کاربر ربات را شروع می‌کند
