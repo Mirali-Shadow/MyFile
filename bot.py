@@ -8,7 +8,7 @@ CHANNEL_USERNAME = "@mirali_vibe"  # نام کاربری کانال شما
 
 # تابع برای ارسال فایل
 async def send_file(user_id: int, context: CallbackContext):
-    file_path = "/workspaces/MyFile/Gang Vaghei (BLH Remix).mp3"
+    file_path = "/workspaces/MyFile/Pishro - Tamum Shode (featuring Kamyar).mp3"
     await context.bot.send_document(chat_id=user_id, document=open(file_path, 'rb'))
     await context.bot.send_message(chat_id=user_id, text="فایل ارسال شد.")
 
