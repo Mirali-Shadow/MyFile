@@ -14,7 +14,7 @@ const fileUrl = 'https://raw.githubusercontent.com/Mirali-Shadow/MyFile/2fa16293
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     // ارسال پیام سلام به کاربر
-    bot.sendMessage(chatId, 'سلام! خوش آمدید به ربات ما!');
+    //bot.sendMessage(chatId, 'سلام! خوش آمدید به ربات ما!');
 });
 
 // مدیریت پیام‌ها
@@ -22,7 +22,7 @@ bot.on('message', (msg) => {
     const chatId = msg.chat.id;
 
     // چک کردن آیا پیام شامل لینک اختصاصی است
-    if (msg.text === 'https://t.me/shadow_byte_bot?start=getfile') {
+    if (msg.text === 'https://t.me/shadow_byte_bot?start=getfil') {
         // اگر لینک درست بود، فایل ارسال شود
         bot.sendDocument(chatId, fileUrl)
             .then(() => {
