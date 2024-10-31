@@ -20,10 +20,16 @@ bot.onText(/\/start/, (msg) => {
 // مدیریت پیام‌ها
 bot.on('message', (msg) => {
     const chatId = msg.chat.id;
-    
-    // چک کردن اینکه آیا پیام شامل لینک اختصاصی است
-    if (msg.text && msg.text.includes('https://t.me/shadow_byte_bot?start=getfile')) {
-        sendFile(chatId); // ارسال فایل بدون هیچ پیام
+
+    // چک کردن آیا پیام شامل لینک اختصاصی است
+    if (msg.text) {
+        // بررسی لینک اختصاصی
+        if (msg.text === 'https://t.me/shadow_byte_bot?start=getfile') {
+            sendFile(chatId);
+        } else {
+            // اگر پیام دیگر باشد، می‌توانیم به کاربر بگوییم که لینک را ارسال کند
+            bot.sendMessage(chatId, 'لطفا لینک اختصاصی را برای دریافت فایل ارسال کنید.');
+        }
     }
 });
 
@@ -33,9 +39,13 @@ function sendFile(chatId) {
     bot.sendDocument(chatId, fileUrl)
         .then(() => {
             console.log(`فایل به ${chatId} ارسال شد`);
+            // پس از ارسال فایل، می‌توانیم یک پیام تأیید ارسال کنیم
+            bot.sendMessage(chatId, 'فایل شما با موفقیت ارسال شد!');
         })
         .catch((error) => {
             console.error(`خطا در ارسال فایل: ${error}`);
+            // در صورت بروز خطا، پیام خطا به کاربر ارسال کنید
+            bot.sendMessage(chatId, 'متاسفانه در ارسال فایل خطایی پیش آمد. لطفا دوباره امتحان کنید.');
         });
 }
 
