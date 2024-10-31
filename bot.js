@@ -44,7 +44,7 @@ bot.on('message', (msg) => {
     const chatId = msg.chat.id;
 
     // بررسی نوع پیام
-    if (msg.text.startsWith('دانلود موزیک')) {
+    if (msg.text.startsWith('دانلود موزیک1')) {
         const trackNumber = msg.text.split(' ')[2]; // شماره موزیک
         const filePath = path.join(__dirname, `Gang Vaghei (BLH Remix)${trackNumber}.mp3`); // فرض بر این است که موزیک‌ها به این صورت نام‌گذاری شده‌اند
 
