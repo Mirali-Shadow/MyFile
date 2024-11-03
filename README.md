@@ -1,1 +1,1 @@
-https://shadowmusic.wuaze.com
+https://www.shadowmusic.wuaze.com
