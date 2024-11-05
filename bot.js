@@ -13,9 +13,9 @@ const albums = [
     {
         title: "آلبوم 1",
         tracks: [
-            { title: "آهنگ 1", url: "https://github.com/Mirali-Shadow/MyFile/raw/refs/heads/main/Pishro%20-%20Tamum%20Shode%20(featuring%20Kamyar).mp3" },
-            // { title: "آهنگ 2", url: "https://example.com/path/to/song2.mp3" },
-            // { title: "آهنگ 3", url: "https://example.com/path/to/song3.mp3" }
+            { title: "آهنگ 1", url: "https://example.com/path/to/song1.mp3" },
+            { title: "آهنگ 2", url: "https://example.com/path/to/song2.mp3" },
+            { title: "آهنگ 3", url: "https://example.com/path/to/song3.mp3" }
         ]
     },
     {
@@ -31,16 +31,17 @@ const albums = [
 // ارسال پیام شیشه‌ای
 function sendGlassMessage(chatId, text) {
     const glassMessage = "💎 " + text + " 💎";
-    bot.sendMessage(chatId, glassMessage);
+    bot.sendMessage(chatId, glassMessage, { parse_mode: "Markdown" });
 }
 
 // فرمان شروع ربات
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
-    sendGlassMessage(chatId, "برای استفاده از ربات، لطفاً به دو کانال زیر ملحق شوید:\n" +
+    const welcomeMessage = "برای استفاده از ربات، لطفاً به دو کانال زیر ملحق شوید:\n" +
         "1. [کانال 1](" + CHANNELS_LINKS[0] + ")\n" +
         "2. [کانال 2](" + CHANNELS_LINKS[1] + ")\n\n" +
-        "سپس بر روی /confirm کلیک کنید تا عضویت شما تایید شود.");
+        "سپس بر روی /confirm کلیک کنید تا عضویت شما تایید شود.";
+    sendGlassMessage(chatId, welcomeMessage);
 });
 
 // بررسی عضویت کاربر
@@ -62,14 +63,14 @@ bot.onText(/\/confirm/, async (msg) => {
         const channel = CHANNELS[i];
         const isMember = await isUserMember(chatId, channel);
         if (!isMember) {
-            bot.sendMessage(chatId, "شما هنوز عضو کانال " + CHANNELS_LINKS[i] + " نیستید.");
+            sendGlassMessage(chatId, "شما هنوز عضو کانال " + CHANNELS_LINKS[i] + " نیستید.");
             allMembers = false;
             break;
         }
     }
 
     if (allMembers) {
-        bot.sendMessage(chatId, "شما عضو هستید! حالا می‌توانید آلبوم‌ها را مشاهده کنید.");
+        sendGlassMessage(chatId, "شما عضو هستید! حالا می‌توانید آلبوم‌ها را مشاهده کنید.");
         showAlbums(chatId);
     }
 });
@@ -100,6 +101,6 @@ bot.onText(/\/play(\d+)/, (msg, match) => {
     });
 
     if (!found) {
-        bot.sendMessage(chatId, "آهنگ مورد نظر یافت نشد.");
+        sendGlassMessage(chatId, "آهنگ مورد نظر یافت نشد.");
     }
 });
