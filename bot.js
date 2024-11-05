@@ -1,27 +1,49 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 // توکن ربات خود را از BotFather وارد کنید
-const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
+const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs'; // توکن ربات خود را وارد کنید
 const bot = new TelegramBot(token, { polling: true });
 
 // نام کانال‌های خود را اینجا وارد کنید
 const CHANNELS = ['@MIRALI_VIBE', '@SHADOW_R3'];
 const CHANNELS_LINKS = ['https://t.me/MIRALI_VIBE', 'https://t.me/SHADOW_R3'];
 
-// هندلرهای دستورات
+// اطلاعات آهنگ‌ها
+const albums = [
+    {
+        title: "آلبوم 1",
+        tracks: [
+            { title: "آهنگ 1", url: "https://example.com/path/to/song1.mp3" },
+            { title: "آهنگ 2", url: "https://example.com/path/to/song2.mp3" },
+            { title: "آهنگ 3", url: "https://example.com/path/to/song3.mp3" }
+        ]
+    },
+    {
+        title: "آلبوم 2",
+        tracks: [
+            { title: "آهنگ 4", url: "https://example.com/path/to/song4.mp3" },
+            { title: "آهنگ 5", url: "https://example.com/path/to/song5.mp3" },
+            { title: "آهنگ 6", url: "https://example.com/path/to/song6.mp3" }
+        ]
+    }
+];
+
+// ارسال پیام شیشه‌ای
+function sendGlassMessage(chatId, text) {
+    const glassMessage = "💎 " + text + " 💎";
+    bot.sendMessage(chatId, glassMessage);
+}
+
+// فرمان شروع ربات
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
-    bot.sendMessage(chatId, "به ربات ما خوش آمدید! برای کمک از /help استفاده کنید.");
+    sendGlassMessage(chatId, "برای استفاده از ربات، لطفاً به دو کانال زیر ملحق شوید:\n" +
+        "1. [کانال 1](" + CHANNELS_LINKS[0] + ")\n" +
+        "2. [کانال 2](" + CHANNELS_LINKS[1] + ")\n\n" +
+        "سپس بر روی /confirm کلیک کنید تا عضویت شما تایید شود.");
 });
 
-bot.onText(/\/help/, (msg) => {
-    const chatId = msg.chat.id;
-    const helpText = "برای درخواست یک فایل، روی دکمه زیر کلیک کنید:\n" +
-                     "فقط بر روی لینک ارائه شده کلیک کنید!";
-    bot.sendMessage(chatId, helpText);
-});
-
-// تابع بررسی عضویت کاربر در کانال‌های مشخص شده
+// بررسی عضویت کاربر
 async function isUserMember(chatId, channel) {
     try {
         const memberStatus = await bot.getChatMember(channel, chatId);
@@ -31,36 +53,53 @@ async function isUserMember(chatId, channel) {
     }
 }
 
-// هندلر درخواست
-bot.onText(/\/request/, async (msg) => {
+// فرمان تایید عضویت
+bot.onText(/\/confirm/, async (msg) => {
     const chatId = msg.chat.id;
-    let isMember = true;
+    let allMembers = true;
 
-    // بررسی عضویت برای هر کانال
-    for (let channel of CHANNELS) {
-        isMember = await isUserMember(channel, chatId);
+    for (let i = 0; i < CHANNELS.length; i++) {
+        const channel = CHANNELS[i];
+        const isMember = await isUserMember(chatId, channel);
         if (!isMember) {
-            const index = CHANNELS.indexOf(channel);
-            bot.sendMessage(chatId, "شما باید عضو کانال " + CHANNELS_LINKS[index] + " شوید تا به فایل‌ها دسترسی داشته باشید.");
-            return;
+            bot.sendMessage(chatId, "شما هنوز عضو کانال " + CHANNELS_LINKS[i] + " نیستید.");
+            allMembers = false;
+            break;
         }
     }
 
-    // اگر کاربر عضو همه کانال‌ها باشد
-    const fileLink = "https://github.com/Mirali-Shadow/MyFile/raw/refs/heads/main/Pishro%20-%20Tamum%20Shode%20(featuring%20Kamyar).mp3"; // لینک فایل واقعی خود را وارد کنید
-    bot.sendMessage(chatId, "شما عضو هستید! در اینجا فایل شما: " + fileLink);
+    if (allMembers) {
+        bot.sendMessage(chatId, "شما عضو هستید! حالا می‌توانید آلبوم‌ها را مشاهده کنید.");
+        showAlbums(chatId);
+    }
 });
 
-// تابع پیام شیشه‌ای برای تمام مراحل
-function sendGlassMessage(chatId, text) {
-    const glassMessage = "💎 " + text + " 💎";
-    bot.sendMessage(chatId, glassMessage);
+// نمایش پنل کاربری با آهنگ‌ها
+function showAlbums(chatId) {
+    albums.forEach(album => {
+        let message = "🎶 " + album.title + " 🎶\n";
+        album.tracks.forEach((track, index) => {
+            message += `${index + 1}. ${track.title} - /play${index + 1}\n`;
+        });
+        sendGlassMessage(chatId, message);
+    });
 }
 
-// گوش دادن به اقدامات کاربر و ارائه پیام‌های شیشه‌ای
-bot.on('message', (msg) => {
+// فرمان پخش آهنگ
+bot.onText(/\/play(\d+)/, (msg, match) => {
     const chatId = msg.chat.id;
-    if (msg.text) {
-        sendGlassMessage(chatId, "شما پیامی ارسال کردید: " + msg.text);
+    const trackIndex = parseInt(match[1]) - 1; // تبدیل به ایندکس صفر
+
+    let found = false;
+    albums.forEach(album => {
+        if (trackIndex < album.tracks.length) {
+            found = true;
+            const track = album.tracks[trackIndex];
+            bot.sendAudio(chatId, track.url, { caption: `در حال پخش: ${track.title}` });
+        }
+    });
+
+    if (!found) {
+        bot.sendMessage(chatId, "آهنگ مورد نظر یافت نشد.");
     }
 });
