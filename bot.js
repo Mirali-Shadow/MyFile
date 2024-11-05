@@ -13,9 +13,9 @@ const albums = [
     {
         title: "آلبوم 1",
         tracks: [
-            { title: "آهنگ 1", url: "https://example.com/path/to/song1.mp3" },
-            { title: "آهنگ 2", url: "https://example.com/path/to/song2.mp3" },
-            { title: "آهنگ 3", url: "https://example.com/path/to/song3.mp3" }
+            { title: "آهنگ 1", url: "https://github.com/Mirali-Shadow/MyFile/raw/refs/heads/main/Pishro%20-%20Tamum%20Shode%20(featuring%20Kamyar).mp3" },
+            // { title: "آهنگ 2", url: "https://example.com/path/to/song2.mp3" },
+            // { title: "آهنگ 3", url: "https://example.com/path/to/song3.mp3" }
         ]
     },
     {
