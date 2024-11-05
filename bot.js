@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // توکن ربات خود را در اینجا وارد کنید
-const token = 'YOUR_TELEGRAM_BOT_TOKEN';
+const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
 const bot = new TelegramBot(token, { polling: true });
 
 // لیست آهنگ‌ها؛ فرض کنید فایل‌های صوتی در پوشه‌ای به نام 'music' ذخیره شده‌اند
