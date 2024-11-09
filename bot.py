@@ -4,7 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
 from collections import defaultdict
 
-TOKEN = "7901203126:AAHdctO95WMVFgZaqdS0guzrmJURuz4tS3Q"
+TOKEN = "6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs"
 CHANNEL_USERNAME = "@MIRALI_VIBE"  # نام کاربری کانال
 
 file_links = {
