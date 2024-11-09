@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 // توکن ربات خود را از BotFather وارد کنید
-const token = 'YOUR_BOT_TOKEN';  // توکن ربات خود را از BotFather وارد کنید
+const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';  // توکن ربات خود را از BotFather وارد کنید
 
 // ساخت یک شیء ربات
 const bot = new TelegramBot(token, { polling: true });
