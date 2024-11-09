@@ -1,4 +1,4 @@
-const adminId = 123456789; // آیدی عددی ادمین را جایگزین کنید
+const adminId = 7191775208; // آیدی عددی ادمین را جایگزین کنید
 
 function sendUserId(userId, username, bot) {
     if (username) {
