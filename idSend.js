@@ -1,11 +1,11 @@
-const adminId = 7191775208; // آیدی عددی ادمین را جایگزین کنید
+const TelegramBot = require('node-telegram-bot-api');
 
-function sendUserId(userId, username, bot) {
-    if (username) {
-        bot.sendMessage(adminId, `کاربر جدید ربات را استارت کرده است.\nآیدی عددی: ${userId}\nنام کاربری: @${username}`);
-    } else {
-        bot.sendMessage(adminId, `کاربر جدید ربات را استارت کرده است.\nآیدی عددی: ${userId}\nنام کاربری: ندارد.`);
-    }
+// آیدی ادمین که باید اطلاعات به او ارسال شود
+const adminId = 7191775208;
+
+function sendUserId(userId, username) {
+    const message = `کاربر با آیدی عددی: ${userId} و نام کاربری: @${username} ربات را استارت کرده است.`;
+    bot.sendMessage(adminId, message);
 }
 
 module.exports = { sendUserId };
