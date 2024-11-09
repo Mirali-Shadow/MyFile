@@ -8,9 +8,9 @@ const bot = new TelegramBot(token, { polling: true });
 
 // فایل‌هایی که باید ارسال شوند
 const fileLinks = {
-  'getfil1': 'https://github.com/Mirali-Shadow/MyFile/raw/refs/heads/main/music/Pishro%20-%20Tamum%20Shode%20(featuring%20Kamyar).mp3',   // مسیر یا URL فایل اول
-  'getfil2': 'path_to_file_2',   // مسیر یا URL فایل دوم
-  'getfil3': 'path_to_file_3'    // مسیر یا URL فایل سوم
+  'getfile1': 'https://github.com/Mirali-Shadow/MyFile/raw/refs/heads/main/music/Pishro%20-%20Tamum%20Shode%20(featuring%20Kamyar).mp3',   // مسیر یا URL فایل اول
+  'getfile2': 'music/Seft (Djsajjad1 & BLH Remix).mp3',   // مسیر یا URL فایل دوم
+  'getfile3': '/workspaces/MyFile/music/benz.mp3'    // مسیر یا URL فایل سوم
 };
 
 // وقتی که کاربر ربات را استارت می‌کند
