@@ -1,59 +1,81 @@
 const TelegramBot = require('node-telegram-bot-api');
-const checkUserMembership = require('./checkMembership');
+const fs = require('fs');
+const path = require('path');
+const membershipCheck = require('./membershipCheck'); // تابع بررسی عضویت در کانال
 
-// توکن ربات و آی‌دی ادمین را تعریف کنید
+// توکن ربات تلگرام
 const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
-const adminId = '7191775208';
 const bot = new TelegramBot(token, { polling: true });
 
-// کانال‌های مورد نیاز برای عضویت
+// مشخصات ادمین
+const adminID = '7191775208';
+
+// کانال‌های مورد نظر برای راستی آزمایی
 const requiredChannels = ['@mirali_vibe', '@shadow_r3'];
 
-// ارسال پیام خوش‌آمدگویی و راستی‌آزمایی عضویت
-bot.onText(/\/start/, async (msg) => {
-    const chatId = msg.chat.id;
-    const userId = msg.from.id;
+// پوشه ذخیره فایل‌ها
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
 
-    // ارسال آی‌دی کاربر به ادمین
-    bot.sendMessage(adminId, `کاربر جدید با آیدی ${userId} ربات را استارت کرده است.`);
-
-    // بررسی عضویت کاربر در کانال‌ها
-    const isMember = await checkUserMembership(userId, requiredChannels, token);
-
-    if (!isMember) {
-        return bot.sendMessage(
-            chatId,
-            `لطفاً ابتدا در کانال‌های زیر عضو شوید:\n${requiredChannels.join('\n')}`
-        );
+// منو برای استارت مجدد
+const startMenu = {
+    reply_markup: {
+        keyboard: [['/start']],
+        one_time_keyboard: true,
+        resize_keyboard: true
     }
+};
 
-    // ایجاد منو و ارسال پیام خوش‌آمدگویی
-    bot.sendMessage(chatId, "به ربات خوش آمدید! لینک کاستوم خود را بفرستید تا فایل‌های مرتبط ارسال شود.", {
-        reply_markup: {
-            keyboard: [['/start']],
-            resize_keyboard: true,
-            one_time_keyboard: true
+// بررسی عضویت و ارسال پیام به ادمین
+function sendMembershipStatus(userID, chatID) {
+    bot.sendMessage(adminID, `کاربر جدید با آیدی ${userID} ربات را استارت کرده است. آیدی لینک دار: https://t.me/${userID}`);
+    bot.sendMessage(chatID, "در حال بررسی عضویت شما در کانال‌ها...");
+}
+
+// ارسال فایل برای کاربر
+function sendFiles(chatID, fileNames) {
+    fileNames.forEach(fileName => {
+        const filePath = path.join(uploadDir, fileName);
+        bot.sendDocument(chatID, filePath);
+    });
+}
+
+// هندلر برای دستور /start
+bot.onText(/\/start/, (msg) => {
+    const chatID = msg.chat.id;
+    const userID = msg.from.id;
+
+    // ارسال آیدی کاربر به ادمین
+    sendMembershipStatus(userID, chatID);
+
+    // درخواست بررسی عضویت
+    membershipCheck.check(userID, requiredChannels, bot).then(isMember => {
+        if (!isMember) {
+            bot.sendMessage(chatID, "لطفاً ابتدا در کانال‌های موردنظر عضو شوید.");
+        } else {
+            bot.sendMessage(chatID, "عضویت شما تایید شد! لینک کاستوم خود را ارسال کنید.", startMenu);
         }
     });
 });
 
-// هندلر دریافت لینک کاستوم و ارسال فایل
+// هندلر برای دریافت لینک کاستوم از کاربر
 bot.on('message', async (msg) => {
-    const chatId = msg.chat.id;
-    const userId = msg.from.id;
+    const chatID = msg.chat.id;
+    const userID = msg.from.id;
 
-    if (msg.text.startsWith("http")) { // بررسی لینک کاستوم
-        const isMember = await checkUserMembership(userId, requiredChannels, token);
+    if (msg.text && msg.text.startsWith('http')) {
+        // بررسی عضویت دوباره
+        membershipCheck.check(userID, requiredChannels, bot).then(isMember => {
+            if (!isMember) {
+                bot.sendMessage(chatID, "لطفاً ابتدا در کانال‌های موردنظر عضو شوید.");
+                return;
+            }
 
-        if (!isMember) {
-            return bot.sendMessage(
-                chatId,
-                `لطفاً ابتدا در کانال‌های زیر عضو شوید:\n${requiredChannels.join('\n')}`
-            );
-        }
-
-        // ارسال فایل‌های مرتبط با لینک (اینجا فایل‌ها ثابت هستند؛ شما می‌توانید فایل‌های متناسب با لینک را تنظیم کنید)
-        bot.sendDocument(chatId, '/workspaces/MyFile/music/Pishro - Tamum Shode (featuring Kamyar).mp3');
-        bot.sendDocument(chatId, 'path/to/your/file2.zip');
+            // ارسال فایل‌های مربوط به لینک
+            // (در اینجا شما می‌توانید فایل‌ها را بر اساس لینک انتخاب کنید)
+            sendFiles(chatID, ['file1.pdf', 'file2.zip']);
+        });
     }
 });
