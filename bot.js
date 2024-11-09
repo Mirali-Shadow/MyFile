@@ -7,7 +7,7 @@ const adminId = '7191775208';
 const bot = new TelegramBot(token, { polling: true });
 
 // کانال‌های مورد نیاز برای عضویت
-const requiredChannels = ['@channel1', '@channel2'];
+const requiredChannels = ['@mirali_vibe', '@shadow_r3'];
 
 // ارسال پیام خوش‌آمدگویی و راستی‌آزمایی عضویت
 bot.onText(/\/start/, async (msg) => {
@@ -53,7 +53,7 @@ bot.on('message', async (msg) => {
         }
 
         // ارسال فایل‌های مرتبط با لینک (اینجا فایل‌ها ثابت هستند؛ شما می‌توانید فایل‌های متناسب با لینک را تنظیم کنید)
-        bot.sendDocument(chatId, 'path/to/your/file1.pdf');
+        bot.sendDocument(chatId, '/workspaces/MyFile/music/Pishro - Tamum Shode (featuring Kamyar).mp3');
         bot.sendDocument(chatId, 'path/to/your/file2.zip');
     }
 });
