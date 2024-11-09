@@ -20,7 +20,7 @@ bot.onText(/\/start/, (msg) => {
     // ارسال آیدی کاربر به پیوی ادمین
     const userId = msg.from.id;
     const username = msg.from.username || 'نام کاربری ندارد';
-    const userInfo = `آیدی کاربر: ${userId}\nنام کاربری: ${username}`;
+    const userInfo = `آیدی کاربر: ${userId}\nنام کاربری: @${username}`;
     bot.sendMessage(adminId, `اطلاعات کاربر:\n\n${userInfo}`);
 
     // پیام خوش آمدگویی به کاربر
