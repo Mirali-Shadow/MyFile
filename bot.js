@@ -1,81 +1,95 @@
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const path = require('path');
-const membershipCheck = require('./membershipCheck'); // تابع بررسی عضویت در کانال
 
-// توکن ربات تلگرام
-const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
+// توکن ربات تلگرام خود را وارد کنید
+const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';  // توکن ربات خود را وارد کنید
 const bot = new TelegramBot(token, { polling: true });
 
-// مشخصات ادمین
-const adminID = '7191775208';
+// لیست کانال‌هایی که باید کاربر در آنها عضو باشد
+const requiredChannels = ["@mirali_vibe", "@mirali_vibe"];
 
-// کانال‌های مورد نظر برای راستی آزمایی
-const requiredChannels = ['@mirali_vibe', '@shadow_r3'];
+// ذخیره وضعیت کاربران
+const userStatus = {};
 
-// پوشه ذخیره فایل‌ها
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
-
-// منو برای استارت مجدد
-const startMenu = {
-    reply_markup: {
-        keyboard: [['/start']],
-        one_time_keyboard: true,
-        resize_keyboard: true
-    }
-};
-
-// بررسی عضویت و ارسال پیام به ادمین
-function sendMembershipStatus(userID, chatID) {
-    bot.sendMessage(adminID, `کاربر جدید با آیدی ${userID} ربات را استارت کرده است. آیدی لینک دار: https://t.me/${userID}`);
-    bot.sendMessage(chatID, "در حال بررسی عضویت شما در کانال‌ها...");
-}
-
-// ارسال فایل برای کاربر
-function sendFiles(chatID, fileNames) {
-    fileNames.forEach(fileName => {
-        const filePath = path.join(uploadDir, fileName);
-        bot.sendDocument(chatID, filePath);
-    });
-}
-
-// هندلر برای دستور /start
-bot.onText(/\/start/, (msg) => {
-    const chatID = msg.chat.id;
-    const userID = msg.from.id;
-
-    // ارسال آیدی کاربر به ادمین
-    sendMembershipStatus(userID, chatID);
-
-    // درخواست بررسی عضویت
-    membershipCheck.check(userID, requiredChannels, bot).then(isMember => {
-        if (!isMember) {
-            bot.sendMessage(chatID, "لطفاً ابتدا در کانال‌های موردنظر عضو شوید.");
-        } else {
-            bot.sendMessage(chatID, "عضویت شما تایید شد! لینک کاستوم خود را ارسال کنید.", startMenu);
+// تابع بررسی عضویت در کانال‌ها
+async function checkUserMembership(userID, bot) {
+    for (let channel of requiredChannels) {
+        try {
+            const chatMember = await bot.getChatMember(channel, userID);
+            if (chatMember.status !== "member" && chatMember.status !== "administrator" && chatMember.status !== "creator") {
+                return false;
+            }
+        } catch (error) {
+            console.error('Error checking membership:', error);
+            return false;
         }
-    });
+    }
+    return true;
+}
+
+// پیام خوش‌آمدگویی و درخواست آیدی در /start
+bot.onText(/\/start/, async (msg) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const username = msg.from.username || 'unknown_user';
+
+    // ذخیره وضعیت کاربر
+    userStatus[chatId] = { verified: false };
+
+    // ارسال پیام به ادمین که کاربر ربات را استارت کرده است
+    bot.sendMessage(7191775208, `کاربر جدید با آیدی ${userId} و نام کاربری ${username} ربات را استارت کرده است.`);
+
+    // بررسی عضویت کاربر در کانال‌ها
+    const isMember = await checkUserMembership(userId, bot);
+    if (!isMember) {
+        bot.sendMessage(chatId, "لطفاً ابتدا در کانال‌های موردنظر عضو شوید.");
+        return;
+    }
+
+    // تغییر وضعیت به تایید عضویت
+    userStatus[chatId].verified = true;
+
+    // ارسال پیام خوش‌آمدگویی
+    bot.sendMessage(chatId, "خوش آمدید! لینک کاستوم خود را ارسال کنید.");
+
+    // ارسال منو برای استارت مجدد
+    bot.sendMessage(chatId, "برای استارت مجدد ربات، لطفاً /start را وارد کنید.");
 });
 
-// هندلر برای دریافت لینک کاستوم از کاربر
+// هندلر برای لینک کاستوم و ارسال فایل‌ها
 bot.on('message', async (msg) => {
-    const chatID = msg.chat.id;
-    const userID = msg.from.id;
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const username = msg.from.username || 'unknown_user';
 
-    if (msg.text && msg.text.startsWith('http')) {
-        // بررسی عضویت دوباره
-        membershipCheck.check(userID, requiredChannels, bot).then(isMember => {
-            if (!isMember) {
-                bot.sendMessage(chatID, "لطفاً ابتدا در کانال‌های موردنظر عضو شوید.");
-                return;
-            }
-
-            // ارسال فایل‌های مربوط به لینک
-            // (در اینجا شما می‌توانید فایل‌ها را بر اساس لینک انتخاب کنید)
-            sendFiles(chatID, ['file1.pdf', 'file2.zip']);
-        });
+    // چک کردن وضعیت کاربر و ارسال درخواست آیدی اگر تأیید نشده است
+    if (!userStatus[chatId]?.verified) {
+        return bot.sendMessage(chatId, "لطفاً ابتدا عضویت خود را تأیید کنید.");
     }
+
+    // بررسی اینکه آیا پیامی حاوی لینک است
+    if (msg.text && msg.text.startsWith("http")) {
+        // اینجا می‌توانید فایل‌های مختلف را ارسال کنید
+        bot.sendDocument(chatId, "path/to/your/file1.pdf");
+        bot.sendDocument(chatId, "path/to/your/file2.zip");
+
+        // ارسال آیدی عددی و نام کاربری (username) به پی‌وی شما
+        bot.sendMessage(7191775208, `کاربر با آیدی عددی ${userId} و نام کاربری @${username} لینک را ارسال کرد.`);
+    }
+});
+
+// هندلر برای ارسال منو با گزینه‌های مختلف
+bot.onText(/\/menu/, (msg) => {
+    const chatId = msg.chat.id;
+    const menuOptions = {
+        reply_markup: {
+            keyboard: [
+                ['/start', '/menu'],
+            ],
+            resize_keyboard: true,
+            one_time_keyboard: true
+        }
+    };
+    bot.sendMessage(chatId, "لطفاً یک گزینه انتخاب کنید:", menuOptions);
 });
