@@ -1,6 +1,4 @@
 const TelegramBot = require('node-telegram-bot-api');
-const { checkMembership } = require('./membershipCheck'); // وارد کردن تابع بررسی عضویت
-const { sendUserId } = require('./idSend'); // وارد کردن تابع ارسال آیدی
 const fs = require('fs');
 const path = require('path');
 
@@ -8,14 +6,8 @@ const path = require('path');
 const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
 const bot = new TelegramBot(token, { polling: true });
 
-// پوشه‌ای برای ذخیره فایل‌های آپلود شده
-const uploadDir = path.join(__dirname, 'uploads');
-const logFilePath = path.join(__dirname, 'uploads_log.txt'); // فایل لاگ برای ذخیره تاریخچه آپلودها
-
-// اگر پوشه 'uploads' وجود ندارد، آن را ایجاد می‌کنیم
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
+// آیدی ادمین که اطلاعات به او ارسال خواهد شد
+const adminId = 7191775208; // جایگزین با آیدی تلگرام خود
 
 // ذخیره وضعیت کاربران
 const userStatus = {};
@@ -24,6 +16,14 @@ const userStatus = {};
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     userStatus[chatId] = { verified: false }; // وضعیت اولیه کاربر
+
+    // ارسال آیدی کاربر به پیوی ادمین
+    const userId = msg.from.id;
+    const username = msg.from.username || 'نام کاربری ندارد';
+    const userInfo = `آیدی کاربر: ${userId}\nنام کاربری: ${username}`;
+    bot.sendMessage(adminId, `اطلاعات کاربر:\n\n${userInfo}`);
+
+    // پیام خوش آمدگویی به کاربر
     bot.sendMessage(chatId, `خوش آمدید! لطفاً ابتدا آیدی تلگرام خود را مانند @example_telegram ارسال کنید تا بتوانید فایل آپلود کنید.`);
 });
 
@@ -78,14 +78,6 @@ bot.on('message', async (msg) => {
                     return bot.sendMessage(chatId, "مشکلی در ذخیره فایل شما به وجود آمد.");
                 }
 
-                // ذخیره اطلاعات آپلود در فایل لاگ
-                const logEntry = `کاربر: ${username}, فایل: ${fileName}\n`;
-                fs.appendFile(logFilePath, logEntry, (err) => {
-                    if (err) {
-                        console.error('خطا در نوشتن لاگ آپلود:', err);
-                    }
-                });
-
                 bot.sendMessage(chatId, `فایل "${fileName}" با موفقیت آپلود شد \n برای ارسال فایل های بیشتر روی /start کلیک کنید !`);
             });
         });
@@ -93,16 +85,4 @@ bot.on('message', async (msg) => {
         console.error('خطا در دانلود فایل:', error);
         bot.sendMessage(chatId, "مشکلی در آپلود فایل شما به وجود آمد.");
     }
-});
-
-// هندلر برای ارسال آیدی و اطلاعات کاربر
-bot.onText(/\/check/, (msg) => {
-    const chatId = msg.chat.id;
-    const userId = msg.from.id;
-    const username = msg.from.username || 'نام کاربری ندارد';
-
-    // ارسال اطلاعات به پیوی ادمین
-    sendUserId(userId, username);
-
-    bot.sendMessage(chatId, "اطلاعات شما ارسال شد.");
 });
