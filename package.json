@@ -10,5 +10,8 @@
         "axios": "^1.7.7",
         "node-telegram-bot-api": "^0.66.0",
         "uuid": "^7.0.3"
-    }
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
 }
