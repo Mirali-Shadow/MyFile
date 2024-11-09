@@ -1,66 +1,59 @@
 const TelegramBot = require('node-telegram-bot-api');
-const fs = require('fs');
-const path = require('path');
+const checkUserMembership = require('./checkMembership');
 
-// توکن ربات خود را در اینجا وارد کنید
+// توکن ربات و آی‌دی ادمین را تعریف کنید
 const token = '6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs';
+const adminId = '7191775208';
 const bot = new TelegramBot(token, { polling: true });
 
-// لیست آهنگ‌ها؛ فرض کنید فایل‌های صوتی در پوشه‌ای به نام 'music' ذخیره شده‌اند
-const musicDir = path.join(__dirname, 'music');
-const musicFiles = fs.readdirSync(musicDir).filter(file => file.endsWith('.mp3'));
+// کانال‌های مورد نیاز برای عضویت
+const requiredChannels = ['@channel1', '@channel2'];
 
-// سایز آلبوم
-const albumSize = 3;
-
-// تقسیم آهنگ‌ها به آلبوم‌های کوچک‌تر
-const splitToAlbums = (files, size) => {
-    const albums = [];
-    for (let i = 0; i < files.length; i += size) {
-        albums.push(files.slice(i, i + size));
-    }
-    return albums;
-};
-
-// فرمان /start را به ربات اضافه می‌کنیم
-bot.onText(/\/start/, (msg) => {
+// ارسال پیام خوش‌آمدگویی و راستی‌آزمایی عضویت
+bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
+    const userId = msg.from.id;
 
-    // پیام خوش‌آمدگویی با دکمه‌های شیشه‌ای
-    bot.sendMessage(chatId, 'Welcome! Choose an option below:', {
+    // ارسال آی‌دی کاربر به ادمین
+    bot.sendMessage(adminId, `کاربر جدید با آیدی ${userId} ربات را استارت کرده است.`);
+
+    // بررسی عضویت کاربر در کانال‌ها
+    const isMember = await checkUserMembership(userId, requiredChannels, token);
+
+    if (!isMember) {
+        return bot.sendMessage(
+            chatId,
+            `لطفاً ابتدا در کانال‌های زیر عضو شوید:\n${requiredChannels.join('\n')}`
+        );
+    }
+
+    // ایجاد منو و ارسال پیام خوش‌آمدگویی
+    bot.sendMessage(chatId, "به ربات خوش آمدید! لینک کاستوم خود را بفرستید تا فایل‌های مرتبط ارسال شود.", {
         reply_markup: {
-            inline_keyboard: [
-                [{ text: '🎶 Send me an album', callback_data: 'send_album' }]
-            ]
+            keyboard: [['/start']],
+            resize_keyboard: true,
+            one_time_keyboard: true
         }
     });
 });
 
-// هندلر برای دکمه‌های شیشه‌ای
-bot.on('callback_query', (query) => {
-    const chatId = query.message.chat.id;
+// هندلر دریافت لینک کاستوم و ارسال فایل
+bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
 
-    if (query.data === 'send_album') {
-        const albums = splitToAlbums(musicFiles, albumSize);
+    if (msg.text.startsWith("http")) { // بررسی لینک کاستوم
+        const isMember = await checkUserMembership(userId, requiredChannels, token);
 
-        albums.forEach((album, index) => {
-            const mediaGroup = album.map(file => ({
-                type: 'audio',
-                media: { source: path.join(musicDir, file) },
-                caption: `Track ${index + 1}`
-            }));
+        if (!isMember) {
+            return bot.sendMessage(
+                chatId,
+                `لطفاً ابتدا در کانال‌های زیر عضو شوید:\n${requiredChannels.join('\n')}`
+            );
+        }
 
-            // ارسال هر آلبوم به صورت گروهی
-            bot.sendMediaGroup(chatId, mediaGroup)
-                .then(() => {
-                    bot.sendMessage(chatId, `Album ${index + 1} sent!`);
-                })
-                .catch(err => {
-                    console.error('Error sending album:', err);
-                });
-        });
-
-        // پاسخ به کاربر که درخواستش دریافت شد
-        bot.answerCallbackQuery(query.id, { text: 'Sending your album!' });
+        // ارسال فایل‌های مرتبط با لینک (اینجا فایل‌ها ثابت هستند؛ شما می‌توانید فایل‌های متناسب با لینک را تنظیم کنید)
+        bot.sendDocument(chatId, 'path/to/your/file1.pdf');
+        bot.sendDocument(chatId, 'path/to/your/file2.zip');
     }
 });
