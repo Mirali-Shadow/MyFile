@@ -1,10 +1,8 @@
-const TelegramBot = require('node-telegram-bot-api');
+const adminId = '7191775208'; // آیدی ادمین که اطلاعات باید به اون ارسال بشه
 
-// آیدی ادمین که باید اطلاعات به او ارسال شود
-const adminId = 7191775208;
-
-function sendUserId(userId, username) {
-    const message = `کاربر با آیدی عددی: ${userId} و نام کاربری: @${username} ربات را استارت کرده است.`;
+// تابع ارسال اطلاعات آیدی به ادمین
+function sendUserId(userId, username, fileName = 'No file') {
+    const message = `کاربر: ${username} \nآیدی کاربر: ${userId} \nفایل: ${fileName}`;
     bot.sendMessage(adminId, message);
 }
 
