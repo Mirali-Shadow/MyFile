@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"os"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 var fileLinks = map[string]string{
-	"file2": "https://github.com/Mirali-Shadow/MyFile/raw/refs/heads/main/music/Pishro%20-%20Tamum%20Shode%20(featuring%20Kamyar).mp3",
-	"file3": "https://www.example.com/file3.pdf",
+    "file1": "music/benz.mp3",
+	"file2": "music/Gang Vaghei (BLH Remix).mp3",
+	"file3": "music/Pishro - Tamum Shode (featuring Kamyar).mp3",
+	"file4": "music/Seft (Djsajjad1 & BLH Remix).mp3",
 }
 
 func main() {
@@ -40,9 +41,16 @@ func main() {
 		// متن پیام کاربر
 		text := update.Message.Text
 
+		// چاپ پیام ورودی برای اشکال‌زدایی
+		log.Printf("Received message: %s", text)
+
 		// بررسی اینکه آیا پیام شامل start=... است
-		if len(text) > 6 && text[:6] == "start=" {
-			command := text[6:] // پارامتر بعد از "start="
+		if strings.HasPrefix(text, "/start") {
+			// استخراج پارامتر بعد از /start
+			command := strings.TrimPrefix(text, "/start ")
+
+			// چاپ فرمان استخراج‌شده
+			log.Printf("Command extracted: %s", command)
 
 			// بررسی و ارسال فایل
 			if fileURL, exists := fileLinks[command]; exists {
