@@ -1,105 +1,135 @@
+import telebot
+import logging
+import yt_dlp
 import os
-import asyncio
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackContext, CallbackQueryHandler
-from collections import defaultdict
+import subprocess
 
-TOKEN = "6414679474:AAHBrTFt5sCbbudkXHu3JvPrR_Pj50T30qs"
-CHANNEL_USERNAME = "@mirali_vibe"  # نام کاربری کانال
+# توکن ربات خود را وارد کنید
+API_TOKEN = '7835327718:AAG0aK8WyexgLccGwniQm-SCcp2pFQYhyEI'
+bot = telebot.TeleBot(API_TOKEN)
 
-# لینک‌های فایل‌های تست
-file_links = {
-    "song1": "https://www.shadowofficial.great-site.net/MyMusic/Barzakh.mp3",
-    "song2": "Gang Vaghei (BLH Remix).mp3",
-    "song3": "Pishro - Tamum Shode (featuring Kamyar).mp3"
-}
+# تنظیمات لاگینگ برای دیباگ
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-joined_users = set()
-download_counts = defaultdict(int)
-MAX_DOWNLOADS = 5
+# دستور start
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "سلام! لطفا لینک پلی‌لیست یا موزیک را از ساندکلود، اسپاتیفای یا یوتیوب ارسال کنید تا ربات آن را دانلود و ارسال کند.")
 
-# پیام شیشه‌ای با قابلیت حذف خودکار
-async def send_glass_message(context: CallbackContext, user_id: int, text: str, delay: int = 60):
-    message = await context.bot.send_message(chat_id=user_id, text=text)
-    await asyncio.sleep(delay)
-    await context.bot.delete_message(chat_id=user_id, message_id=message.message_id)
+# تابع دانلود از ساندکلود (برای یک آهنگ)
+def download_from_soundcloud(url):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': 'downloads/%(title)s.%(ext)s',
+        'nocheckcertificate': True,
+        'quiet': True,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(url, download=True)
+        file_name = ydl.prepare_filename(info_dict)
+        title = info_dict.get('title', 'Unknown Title')
+        artist = info_dict.get('uploader', 'Unknown Artist')
+        return file_name, title, artist
 
-# ارسال فایل به کاربر به عنوان پیام شیشه‌ای
-async def send_file_glass(user_id: int, context: CallbackContext, file_name: str):
-    file_path = f"/path/to/your/files/{file_name}"
-    if not os.path.exists(file_path):
-        await context.bot.send_message(chat_id=user_id, text="⚠️ فایل مورد نظر موجود نیست.")
-        return
+# تابع دانلود از یوتیوب (برای یک آهنگ)
+def download_from_youtube(url):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': 'downloads/%(title)s.%(ext)s',
+        'nocheckcertificate': True,
+        'quiet': True,
+        'cookiefile': 'cookie.txt',  # مسیر فایل کوکی‌ها برای عبور از CAPTCHA
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(url, download=True)
+        file_name = ydl.prepare_filename(info_dict)
+        title = info_dict.get('title', 'Unknown Title')
+        artist = info_dict.get('uploader', 'Unknown Artist')
+        return file_name, title, artist
 
-    if download_counts[user_id] >= MAX_DOWNLOADS:
-        await context.bot.send_message(chat_id=user_id, text="⚠️ به حد مجاز دانلود رسیدید.")
-        return
+# تابع دانلود از اسپاتیفای (برای یک آهنگ)
+def download_from_spotify(url):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': 'downloads/%(title)s.%(ext)s',
+        'nocheckcertificate': True,
+        'quiet': True,
+        'extractaudio': True,  # تبدیل به فایل صوتی
+        'audioquality': 1,  # بهترین کیفیت
+        'geo_bypass': True,  # عبور از محدودیت‌های جغرافیایی
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(url, download=True)
+        file_name = ydl.prepare_filename(info_dict)
+        title = info_dict.get('title', 'Unknown Title')
+        artist = info_dict.get('uploader', 'Unknown Artist')
+        return file_name, title, artist
 
-    message = await context.bot.send_document(chat_id=user_id, document=open(file_path, 'rb'))
-    download_counts[user_id] += 1
-    await asyncio.sleep(60)
-    await context.bot.delete_message(chat_id=user_id, message_id=message.message_id)
-    await context.bot.send_message(chat_id=user_id, text="فایل به طور خودکار حذف شد. دوباره درخواست دهید.")
-
-# درخواست عضویت در کانال با تاییدیه
-async def send_join_request(update: Update, context: CallbackContext) -> None:
-    keyboard = [
-        [InlineKeyboardButton("عضویت در کانال", url="https://t.me/your_channel")],
-        [InlineKeyboardButton("تایید عضویت", callback_data='confirm_membership')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("لطفاً عضو کانال شوید و سپس تایید عضویت را بزنید.", reply_markup=reply_markup)
-
-# بررسی عضویت کاربر
-async def check_membership(update: Update, context: CallbackContext) -> None:
-    query = update.callback_query
-    await query.answer()
-    user_id = query.from_user.id
-
+# تابع برای تبدیل فایل به MP3 (در صورت نیاز)
+def convert_to_mp3(file_path):
+    output_path = file_path.rsplit('.', 1)[0] + '.mp3'
     try:
-        chat_member = await context.bot.get_chat_member(CHANNEL_USERNAME, user_id)
-        if chat_member.status in ['member', 'administrator', 'creator']:
-            joined_users.add(user_id)
-            await send_glass_message(context, user_id, "✅ عضویت تایید شد.", delay=10)
-        else:
-            await query.message.reply_text("❌ هنوز عضو نیستید.")
+        subprocess.run(['ffmpeg', '-i', file_path, output_path], check=True)
+        os.remove(file_path)  # حذف فایل اصلی پس از تبدیل
+        return output_path
     except Exception as e:
-        await query.message.reply_text("❌ خطا در بررسی عضویت.")
+        logger.error(f"خطا در تبدیل فایل: {e}")
+        return None
 
-# نمایش لیست فایل‌ها
-async def list_files(update: Update, context: CallbackContext) -> None:
-    file_list = "\n".join([f"/file_{key} - {key.replace('-', ' ').title()}" for key in file_links.keys()])
-    await update.message.reply_text(f"لیست فایل‌های موجود:\n{file_list}")
-
-# دستور /start با پیام شیشه‌ای
-async def start(update: Update, context: CallbackContext) -> None:
-    user_id = update.message.from_user.id
+# تابع برای ارسال موزیک به‌صورت موزیک (نه ویس)
+def send_music_file(message, file_path, title, artist):
     try:
-        chat_member = await context.bot.get_chat_member(CHANNEL_USERNAME, user_id)
-        if chat_member.status in ['member', 'administrator', 'creator']:
-            joined_users.add(user_id)
-            await send_glass_message(context, user_id, "به ربات خوش آمدید! از /help برای دریافت راهنما استفاده کنید.")
-        else:
-            await send_join_request(update, context)
+        bot.send_audio(message.chat.id, open(file_path, 'rb'), title=title, performer=artist)
     except Exception as e:
-        await update.message.reply_text("خطا در بررسی عضویت.")
+        bot.reply_to(message, f"خطا در ارسال فایل: {str(e)}")
 
-# راهنما
-async def help_command(update: Update, context: CallbackContext) -> None:
-    await update.message.reply_text(
-        "دستورات ربات:\n"
-        "/start - شروع ربات\n"
-        "/list_files - مشاهده فایل‌ها\n"
-        "/help - راهنما"
-    )
+# تابع برای دریافت لینک و ارسال آهنگ‌ها
+@bot.message_handler(func=lambda message: True)
+def handle_message(message):
+    logger.info(f"Received message from {message.from_user.username}")
+    
+    if "soundcloud.com" in message.text:
+        url = message.text
+        bot.reply_to(message, 'در حال دانلود موزیک‌ها از ساندکلود...')
+        try:
+            file_path, title, artist = download_from_soundcloud(url)
+            if file_path:
+                send_music_file(message, file_path, title, artist)
+                os.remove(file_path)
+            else:
+                bot.reply_to(message, "خطا در دانلود یا ارسال فایل.")
+        except Exception as e:
+            bot.reply_to(message, f"خطا در دانلود یا ارسال فایل: {str(e)}")
+    
+    elif "youtube.com" in message.text or "youtu.be" in message.text:
+        url = message.text
+        bot.reply_to(message, 'در حال دانلود موزیک‌ها از یوتیوب...')
+        try:
+            file_path, title, artist = download_from_youtube(url)
+            if file_path:
+                send_music_file(message, file_path, title, artist)
+                os.remove(file_path)
+            else:
+                bot.reply_to(message, "خطا در دانلود یا ارسال فایل.")
+        except Exception as e:
+            bot.reply_to(message, f"خطا در دانلود یا ارسال فایل: {str(e)}")
+    
+    elif "spotify.com" in message.text:
+        url = message.text
+        bot.reply_to(message, 'در حال دانلود موزیک‌ها از اسپاتیفای...')
+        try:
+            file_path, title, artist = download_from_spotify(url)
+            if file_path:
+                send_music_file(message, file_path, title, artist)
+                os.remove(file_path)
+            else:
+                bot.reply_to(message, "خطا در دانلود یا ارسال فایل.")
+        except Exception as e:
+            bot.reply_to(message, f"خطا در دانلود یا ارسال فایل: {str(e)}")
+    
+    else:
+        bot.reply_to(message, "لطفا یک لینک معتبر از ساندکلود، یوتیوب یا اسپاتیفای ارسال کنید.")
 
-def main():
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("list_files", list_files))
-    app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(CallbackQueryHandler(check_membership, pattern='^confirm_membership$'))
-    app.run_polling()
-
-if __name__ == "__main__":
-    main()
+# اجرای ربات
+bot.polling()
