@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # دستور start
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "سلام! لطفا لینک پلی‌لیست یا موزیک را از ساندکلود، اسپاتیفای یا یوتیوب ارسال کنید تا ربات آن را دانلود و ارسال کند.")
+    bot.reply_to(message, "درود بر شما! لطفا لینک پلی‌لیست یا موزیک را از ساندکلود یا یوتیوب ارسال کنید تا ربات آن را دانلود و ارسال کند.\n ⚠️ در ضمن توجه داشته باشید لینک های یوتیوب فقط به صورت فایل موزیک به شما داده خواهد شد ❗️❕")
 
 # تابع دانلود از ساندکلود (برای یک آهنگ)
 def download_from_soundcloud(url):
@@ -115,21 +115,5 @@ def handle_message(message):
         except Exception as e:
             bot.reply_to(message, f"خطا در دانلود یا ارسال فایل: {str(e)}")
     
-    elif "spotify.com" in message.text:
-        url = message.text
-        bot.reply_to(message, 'در حال دانلود موزیک‌ها از اسپاتیفای...')
-        try:
-            file_path, title, artist = download_from_spotify(url)
-            if file_path:
-                send_music_file(message, file_path, title, artist)
-                os.remove(file_path)
-            else:
-                bot.reply_to(message, "خطا در دانلود یا ارسال فایل.")
-        except Exception as e:
-            bot.reply_to(message, f"خطا در دانلود یا ارسال فایل: {str(e)}")
-    
-    else:
-        bot.reply_to(message, "لطفا یک لینک معتبر از ساندکلود، یوتیوب یا اسپاتیفای ارسال کنید.")
-
 # اجرای ربات
 bot.polling()
