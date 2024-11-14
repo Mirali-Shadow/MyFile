@@ -33,20 +33,43 @@ def handle_youtube_format_choice(message):
     format_choice = message.text
 
     if format_choice == "MP3":
-        download_and_send_youtube(message, url, 'bestaudio/best')
+        download_and_send_youtube_audio(message, url, 'bestaudio/best')
     elif format_choice == "MP4":
-        download_and_send_youtube(message, url, 'bestvideo+bestaudio/best')
+        # نمایش دکمه‌ها برای انتخاب کیفیت
+        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True)
+        markup.add('720p', '480p', '360p')
+        bot.reply_to(message, "لطفا کیفیت ویدیو را انتخاب کنید (720p، 480p، یا 360p):", reply_markup=markup)
+        bot.register_next_step_handler(message, handle_youtube_quality_choice)
     else:
         bot.reply_to(message, "فرمت معتبر نیست. لطفا MP3 یا MP4 را انتخاب کنید.")
 
-# دانلود و ارسال فایل یوتیوب بر اساس فرمت انتخابی
-def download_and_send_youtube(message, url, format_choice):
+# تابع برای ذخیره انتخاب کیفیت و دانلود فایل ویدیویی
+def handle_youtube_quality_choice(message):
+    url = bot.user_data.get('youtube_url')
+    quality = message.text
+
+    # انتخاب فرمت و کیفیت بر اساس انتخاب کاربر
+    format_choice = ''
+    if quality == "720p":
+        format_choice = 'bestvideo[height<=720]+bestaudio/best'
+    elif quality == "480p":
+        format_choice = 'bestvideo[height<=480]+bestaudio/best'
+    elif quality == "360p":
+        format_choice = 'bestvideo[height<=360]+bestaudio/best'
+    else:
+        bot.reply_to(message, "کیفیت معتبر نیست. لطفا 720p، 480p یا 360p را انتخاب کنید.")
+        return
+
+    download_and_send_youtube_video(message, url, format_choice)
+
+# دانلود و ارسال فایل صوتی از یوتیوب
+def download_and_send_youtube_audio(message, url, format_choice):
     ydl_opts = {
         'format': format_choice,
         'outtmpl': 'downloads/%(title)s.%(ext)s',
         'nocheckcertificate': True,
         'quiet': True,
-        'cookiefile' : 'cookie.txt'
+        'cookiefile': 'cookie.txt'
     }
 
     try:
@@ -57,6 +80,27 @@ def download_and_send_youtube(message, url, format_choice):
             artist = info_dict.get('uploader', 'Unknown Artist')
 
             send_music_file(message, file_name, title, artist)
+            os.remove(file_name)
+
+    except Exception as e:
+        bot.reply_to(message, f"خطا در دانلود یا ارسال فایل: {str(e)}")
+
+# دانلود و ارسال فایل ویدیویی از یوتیوب
+def download_and_send_youtube_video(message, url, format_choice):
+    ydl_opts = {
+        'format': format_choice,
+        'outtmpl': 'downloads/%(title)s.%(ext)s',
+        'nocheckcertificate': True,
+        'quiet': True,
+        'cookiefile': 'cookie.txt'
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=True)
+            file_name = ydl.prepare_filename(info_dict)
+            title = info_dict.get('title', 'Unknown Title')
+            bot.send_video(message.chat.id, open(file_name, 'rb'), caption=title)
             os.remove(file_name)
 
     except Exception as e:
@@ -86,7 +130,7 @@ def download_from_soundcloud(url):
             artist = info_dict.get('uploader', 'Unknown Artist')
             return [(file_name, title, artist)]
 
-# تابع برای ارسال موزیک به‌صورت موزیک
+# تابع برای ارسال موزیک به‌صورت فایل صوتی
 def send_music_file(message, file_path, title, artist):
     try:
         bot.send_audio(message.chat.id, open(file_path, 'rb'), title=title, performer=artist)
