@@ -47,17 +47,39 @@ def send_channels_to_user(chat_id):
     bot.send_message(chat_id, WELCOME_MESSAGE, reply_markup=markup)
 
 # هندلر دستور /start
-@bot.message_handler(commands=['start'])
-def handle_start(message):
+# هندلر عمومی برای همه پیام‌ها
+@bot.message_handler(func=lambda message: True)
+def handle_all_messages(message):
     user_id = message.from_user.id
     username = message.from_user.username or "No Username"
     first_name = message.from_user.first_name or "No First Name"
     last_name = message.from_user.last_name or "No Last Name"
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # بررسی عضویت کاربر در کانال‌ها
+    not_joined = check_all_channels(user_id)
+
+    if not_joined:
+        # اگر عضو همه کانال‌ها نشده باشد، پیامی به کاربر ارسال می‌شود که می‌گوید ابتدا باید در کانال‌ها عضو شود
+        message_text = "❌ شما هنوز در کانال‌های زیر عضو نشده‌اید:\n"
+        for channel in not_joined:
+            message_text += f"{channel['name']} - {channel['invite_link']}\n"
+
+        # ایجاد دوباره دکمه‌ها برای استعلام عضویت
+        markup = InlineKeyboardMarkup()
+        for channel in not_joined:
+            markup.add(InlineKeyboardButton(text=f"عضویت در {channel['name']}", url=channel['invite_link']))
+        markup.add(InlineKeyboardButton(text="تأیید عضویت", callback_data="check_membership"))
+
+        # ارسال پیامی به کاربر که باید ابتدا در کانال‌ها عضو شود
+        bot.send_message(message.chat.id, message_text, reply_markup=markup)
+        return  # از اینجا به بعد هیچ کاری انجام نمی‌دهیم چون کاربر باید در کانال‌ها عضو شود.
+
+    # اگر کاربر عضو تمام کانال‌ها باشد، کد زیر اجرا می‌شود.
     if message.text == '/start':
         send_channels_to_user(message.chat.id)
-        print(f"[{current_time}] User started the bot (without any command): {first_name} {last_name}")
+        print(f"[{current_time}] User started the bot: {first_name} {last_name}")
+
     else:
         file_link = get_file_link_from_db(message.text)
         if file_link:
@@ -67,7 +89,7 @@ def handle_start(message):
         else:
             bot.send_message(message.chat.id, "لینک استارتی شما معتبر نیست. لطفاً لینک درست را امتحان کنید.")
 
-    print(f"[{current_time}] User started the bot:")
+    print(f"[{current_time}] User sent a message:")
     print(f"  ID: {user_id}")
     print(f"  Username: @{username}")
     print(f"  Name: {first_name} {last_name}")
