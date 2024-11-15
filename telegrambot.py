@@ -1,49 +1,69 @@
 import telebot
-from telebot import types
+import json
 from datetime import datetime
+from telebot import types
 
-bot = telebot.TeleBot("6352712951:AAHtDi_d8NfcmpaYYE9uqX9jZGD-6lsyj40")
+API_TOKEN = '6352712951:AAHtDi_d8NfcmpaYYE9uqX9jZGD-6lsyj40'
+bot = telebot.TeleBot(API_TOKEN)
 
+# بارگذاری داده‌های فایل‌ها از فایل JSON
+def load_files_from_json():
+    with open('files.json', 'r', encoding='utf-8') as file:
+        return json.load(file)
+
+files_data = load_files_from_json()
+
+# دریافت لینک فایل از JSON بر اساس دستور
+def get_file_link_from_json(command):
+    for file in files_data:
+        if file['command'] == command:
+            return file['file_id'], file['file_name']
+    return None, None
+
+# دستور برای ارسال فایل از لینک دانلود مستقیم
 @bot.message_handler(commands=['start'])
 def handle_start(message):
     user_id = message.from_user.id
-    username = message.from_user.username or "No Username"  # اگر یوزرنیم نداشت، مقدار پیش‌فرض
+    username = message.from_user.username or "No Username"
     first_name = message.from_user.first_name or "No First Name"
     last_name = message.from_user.last_name or "No Last Name"
 
     # تاریخ و زمان فعلی
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # دریافت پارامتر start از پیام
-    if message.text == '/start 1568d32k74':
-        # اگر لینک درست باشد، فایل ارسال می‌شود
-        file_url = "https://drive.google.com/uc?export=download&id=12aZaNkF-fWTg_5TadLY7KRJL8b6gar3x"
-        bot.send_message(message.chat.id, "در حال ارسال فایل...")
-        bot.send_document(message.chat.id, file_url)
-    elif message.text == '/start getfil':
-        file_url1 = "https://drive.google.com/uc?export=download&id=1WnXT_aBpxRDtMZ5GELT2YnCiEWSAqNtD"
-        bot.send_message(message.chat.id, "در حال ارسال فایل شما...")
-        bot.send_document(message.chat.id, file_url1)
-    else:
-        # اگر لینک اشتباه باشد
-        bot.send_message(message.chat.id, "لینک استارتی شما معتبر نیست. لطفاً لینک درست را امتحان کنید.")
-        
 
-    # چاپ اطلاعات در ترمینال (قبل از دریافت شماره)
+    # بررسی اینکه آیا فقط دستور /start ارسال شده است یا خیر
+    if message.text == '/start':
+        # اگر فقط /start باشد، هیچ پیامی ارسال نشود، ربات به حالت عادی ادامه می‌دهد
+        print(f"[{current_time}] User {username} ({first_name} {last_name}) started the bot without a file request.")
+        # ارسال پیام خوشامدگویی به کاربر
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+        contact_button = types.KeyboardButton(text="ارسال شماره", request_contact=True)
+        markup.add(contact_button)
+        bot.send_message(
+            message.chat.id,
+            f"سلام {first_name}!\nبه ربات خوش آمدید. 🌟\n\nیوزرنیم شما: @{username if username != 'No Username' else 'نامشخص'}\nلطفا شماره خود را ارسال کنید.",
+            reply_markup=markup
+        )
+        return  # از ادامه کد جلوگیری می‌کنیم تا پیام خطا فرستاده نشود
+
+    # دریافت لینک و نام فایل بر اساس دستور
+    file_id, file_name = get_file_link_from_json(message.text)
+
+    if file_id:
+        file_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+        bot.send_message(message.chat.id, f"در حال ارسال {file_name}...")
+        bot.send_document(message.chat.id, file_url)  # ارسال فایل از لینک
+        print(f"[{current_time}] User {username} ({first_name} {last_name}) requested and downloaded: {file_name} (ID: {file_id})")
+    else:
+        # اگر لینک اشتباه باشد، فقط در صورتی که دستور اشتباه وارد شده باشد
+        print(f"[{current_time}] Invalid command: {message.text}")
+        bot.send_message(message.chat.id, "لینک استارتی شما معتبر نیست.")
+
+    # ارسال اطلاعات کاربر
     print(f"[{current_time}] User started the bot:")
     print(f"  ID: {user_id}")
     print(f"  Username: @{username}")
     print(f"  Name: {first_name} {last_name}")
-
-    # ارسال پیام به کاربر برای درخواست شماره
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    contact_button = types.KeyboardButton(text="ارسال شماره", request_contact=True)
-    markup.add(contact_button)
-    bot.send_message(
-        message.chat.id,
-        f"سلام {first_name}!\nبه ربات خوش آمدید. 🌟\n\nیوزرنیم شما: @{username if username != 'No Username' else 'نامشخص'}\nلطفا شماره خود را ارسال کنید.",
-        reply_markup=markup
-    )
 
 @bot.message_handler(content_types=['contact'])
 def handle_contact(message):
@@ -57,7 +77,7 @@ def handle_contact(message):
 
     # تاریخ و زمان فعلی
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
     # چاپ اطلاعات در ترمینال (بعد از دریافت شماره)
     print(f"[{current_time}] User provided their contact:")
     print(f"  ID: {user_id}")
@@ -71,4 +91,5 @@ def handle_contact(message):
         f"شماره شما: {contact_number}\nتایید شد! ✅"
     )
 
+# راه‌اندازی ربات
 bot.polling()

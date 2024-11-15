@@ -1,0 +1,12 @@
+[
+    {
+        "command": "/start 1568d32k74",
+        "file_id": "12aZaNkF-fWTg_5TadLY7KRJL8b6gar3x",
+        "file_name": "File1"
+    },
+    {
+        "command": "/start getfile",
+        "file_id": "1WnXT_aBpxRDtMZ5GELT2YnCiEWSAqNtD",
+        "file_name": "File2"
+    }
+]
