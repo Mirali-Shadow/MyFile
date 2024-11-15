@@ -1,34 +1,38 @@
 import sqlite3
 
-# اتصال به پایگاه داده
-def connect_db():
-    conn = sqlite3.connect('files.db')
-    return conn
+# ایجاد اتصال به دیتابیس
+def get_db_connection():
+    # اتصال به دیتابیس و فعال کردن استفاده از آن در نخ‌های مختلف
+    return sqlite3.connect('file_links.db', check_same_thread=False)
 
-# ایجاد جدول اگر وجود نداشته باشد
+# ایجاد جدول برای ذخیره فایل‌ها
 def create_table():
-    conn = connect_db()
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS files (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                command TEXT NOT NULL,
-                file_id TEXT NOT NULL)''')
+    # جدول برای ذخیره command و file_id
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            command TEXT UNIQUE,
+            file_id TEXT
+        )
+    ''')
     conn.commit()
     conn.close()
 
-# افزودن فایل به پایگاه داده
+# اضافه کردن فایل به دیتابیس
 def add_file_to_db(command, file_id):
-    conn = connect_db()
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("INSERT INTO files (command, file_id) VALUES (?, ?)", (command, file_id))
+    c.execute("INSERT OR IGNORE INTO files (command, file_id) VALUES (?, ?)", (command, file_id))
     conn.commit()
     conn.close()
 
-# دریافت لینک فایل از پایگاه داده بر اساس دستور
+# گرفتن لینک فایل از دیتابیس بر اساس دستور
 def get_file_link_from_db(command):
-    conn = connect_db()
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT file_id FROM files WHERE command=?", (command,))
+    c.execute("SELECT file_id FROM files WHERE command = ?", (command,))
     result = c.fetchone()
     conn.close()
     return result[0] if result else None
