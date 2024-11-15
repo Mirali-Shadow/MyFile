@@ -8,6 +8,15 @@
         "command": "/start getfile",
         "file_id": "1WnXT_aBpxRDtMZ5GELT2YnCiEWSAqNtD",
         "file_name": "File2"
+    },
+    {
+        "command": "/start getsfile",
+        "file_id": "1WsYdQLLPJOyyoGE1FjMbF0NduECx1zGW",
+        "file_name": "File3"
+    },
+    {
+        "command": "/start getsfil",
+        "file_id": "1ZBanlxvzS2OXdtMAGHhQCJ1_ogqrPfIp",
+        "file_name": "File4"
     }
-    
 ]
