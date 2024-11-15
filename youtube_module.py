@@ -1,16 +1,16 @@
 import yt_dlp
 import os
-import telebot
+import telegrambot
 
 # درخواست فرمت و کیفیت فایل یوتیوب
 def handle_youtube_link(bot, message):
     url = message.text  # ذخیره لینک در یک متغیر محلی
 
     # ساخت اینلاین کیبورد برای انتخاب فرمت
-    markup = telebot.types.InlineKeyboardMarkup()
+    markup = telegrambot.types.InlineKeyboardMarkup()
     markup.add(
-        telebot.types.InlineKeyboardButton('MP3', callback_data=f'format_MP3_{url}'),
-        telebot.types.InlineKeyboardButton('MP4', callback_data=f'format_MP4_{url}')
+        telegrambot.types.InlineKeyboardButton('MP3', callback_data=f'format_MP3_{url}'),
+        telegrambot.types.InlineKeyboardButton('MP4', callback_data=f'format_MP4_{url}')
     )
     bot.reply_to(message, "لطفا فرمت مورد نظر خود را انتخاب کنید:", reply_markup=markup)
 
@@ -23,11 +23,11 @@ def handle_format_choice_callback(bot, call):
         download_and_send_youtube_audio(bot, call.message, url, 'bestaudio/best')
     elif format_choice == "MP4":
         # ساخت اینلاین کیبورد برای انتخاب کیفیت
-        markup = telebot.types.InlineKeyboardMarkup()
+        markup = telegrambot.types.InlineKeyboardMarkup()
         markup.add(
-            telebot.types.InlineKeyboardButton('720p', callback_data=f'quality_720p_{url}'),
-            telebot.types.InlineKeyboardButton('480p', callback_data=f'quality_480p_{url}'),
-            telebot.types.InlineKeyboardButton('360p', callback_data=f'quality_360p_{url}')
+            telegrambot.types.InlineKeyboardButton('720p', callback_data=f'quality_720p_{url}'),
+            telegrambot.types.InlineKeyboardButton('480p', callback_data=f'quality_480p_{url}'),
+            telegrambot.types.InlineKeyboardButton('360p', callback_data=f'quality_360p_{url}')
         )
         bot.edit_message_text("لطفا کیفیت ویدیو را انتخاب کنید:", chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup)
 
@@ -78,7 +78,7 @@ def download_and_send_youtube_video(bot, message, url, format_choice):
         os.remove(file_name)
 
 # اتصال هندلرهای callback به دکمه‌های اینلاین
-bot = telebot.TeleBot('7835327718:AAG0aK8WyexgLccGwniQm-SCcp2pFQYhyEI')
+bot = telegrambot.TeleBot('7835327718:AAG0aK8WyexgLccGwniQm-SCcp2pFQYhyEI')
 
 @bot.message_handler(func=lambda message: 'youtube.com' in message.text or 'youtu.be' in message.text)
 def youtube_link_handler(message):

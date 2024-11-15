@@ -1,11 +1,11 @@
 
-import telebot
+import telegrambot
 import logging
 from youtube_module import handle_youtube_link
 from soundcloud_module import handle_soundcloud_link
 
 API_TOKEN = '7835327718:AAG0aK8WyexgLccGwniQm-SCcp2pFQYhyEI'
-bot = telebot.TeleBot(API_TOKEN)
+bot = telegrambot.TeleBot(API_TOKEN)
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
