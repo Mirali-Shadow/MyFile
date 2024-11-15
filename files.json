@@ -18,5 +18,11 @@
         "command": "/start getsfil",
         "file_id": "1ZBanlxvzS2OXdtMAGHhQCJ1_ogqrPfIp",
         "file_name": "File4"
+    },
+    {
+        "command": "/start myfile",
+        "file_id": "1ZBanlxvzS2OXdtMAGHhQCJ1_ogqrPfIp",
+        "file_name": "MyTestFile.mp3"
     }
+    
 ]
