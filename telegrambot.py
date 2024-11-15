@@ -76,28 +76,38 @@ def handle_start(message):
 @bot.callback_query_handler(func=lambda call: call.data == "check_membership")
 def handle_membership_check(call):
     user_id = call.from_user.id
-    not_joined = check_all_channels(user_id)
+    chat_id = call.message.chat.id
+    message_id = call.message.message_id
 
-    # اگر کاربر عضو تمام کانال‌ها نباشد، پیام شیشه‌ای را ویرایش می‌کنیم
+    # بررسی عضویت کاربر در همه کانال‌ها
+    not_joined = check_all_channels(user_id)
+    
     if not_joined:
         message = "❌ شما هنوز در کانال‌های زیر عضو نشده‌اید:\n"
         for channel in not_joined:
-            message += f"🔗 {channel['name']}: {channel['invite_link']}\n"
-        # ویرایش پیام شیشه‌ای
+            message += f""
+        
+        # ایجاد دوباره دکمه‌ها برای استعلام عضویت
+        markup = InlineKeyboardMarkup()
+        for channel in not_joined:
+            markup.add(InlineKeyboardButton(text=f"عضویت در {channel['name']}", url=channel['invite_link']))
+        markup.add(InlineKeyboardButton(text="تأیید عضویت", callback_data="check_membership"))
+
+        # ویرایش پیام شیشه‌ای و بازگرداندن دکمه‌ها
         bot.edit_message_text(
-            message, 
-            chat_id=call.message.chat.id, 
-            message_id=call.message.message_id
+            text=message,
+            chat_id=chat_id,
+            message_id=message_id,
+            reply_markup=markup
         )
-        send_channels_to_user(call.message.chat.id)  # ارسال دوباره دکمه‌ها
     else:
         message = "✅ شما عضو همه کانال‌ها هستید و می‌توانید از ربات استفاده کنید!"
-        # ویرایش پیام شیشه‌ای
+        
+        # ویرایش پیام شیشه‌ای برای اعلام تأیید عضویت
         bot.edit_message_text(
-            message, 
-            chat_id=call.message.chat.id, 
-            message_id=call.message.message_id
+            text=message,
+            chat_id=chat_id,
+            message_id=message_id
         )
-
 # راه‌اندازی ربات
 bot.polling()
