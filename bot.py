@@ -1,30 +1,40 @@
+import telebot
+from pytube import YouTube
+import os
 
-import telegrambot
-import logging
-from youtube_module import handle_youtube_link
-from soundcloud_module import handle_soundcloud_link
+# توکن ربات تلگرام خود را جایگزین کنید
+bot = telebot.TeleBot("6352712951:AAHtDi_d8NfcmpaYYE9uqX9jZGD-6lsyj40")
 
-API_TOKEN = '7835327718:AAG0aK8WyexgLccGwniQm-SCcp2pFQYhyEI'
-bot = telegrambot.TeleBot(API_TOKEN)
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# دستور start
+# هندلر برای دریافت لینک از کاربر
 @bot.message_handler(commands=['start'])
-def send_welcome(message):
-    bot.reply_to(message, "درود بر شما! لطفا لینک پلی‌لیست یا موزیک را از ساندکلود یا یوتیوب ارسال کنید تا ربات آن را دانلود و ارسال کند.")
+def start_message(message):
+    bot.send_message(
+        message.chat.id, 
+        "سلام! لینک یوتیوب را ارسال کنید تا فایل دانلود شود. 🎥"
+    )
 
-# هندلر اصلی برای شناسایی لینک و توزیع به فایل‌های دیگر
-@bot.message_handler(func=lambda message: True)
-def handle_message(message):
-    logger.info(f"Received message from {message.from_user.username}")
-    
-    if "soundcloud.com" in message.text:
-        handle_soundcloud_link(bot, message)
-    
-    elif "youtube.com" in message.text or "youtu.be" in message.text:
-        handle_youtube_link(bot, message)
+@bot.message_handler(func=lambda m: True)
+def download_youtube_video(message):
+    try:
+        url = message.text.strip()
+        yt = YouTube(url)
 
-# اجرای ربات
+        # انتخاب کیفیت بالاترین رزولوشن ویدیو
+        stream = yt.streams.get_highest_resolution()
+        bot.send_message(message.chat.id, "📥 در حال دانلود ویدیو... لطفا صبر کنید.")
+        file_path = stream.download(output_path="downloads")
+
+        # ارسال فایل به کاربر
+        with open(file_path, 'rb') as video:
+            bot.send_document(message.chat.id, video)
+
+        # حذف فایل پس از ارسال
+        os.remove(file_path)
+        bot.send_message(message.chat.id, "✅ ویدیو با موفقیت ارسال شد!")
+
+    except Exception as e:
+        bot.send_message(message.chat.id, f"❌ خطایی رخ داد:\n{e}")
+
+# شروع ربات
+print("ربات در حال اجرا است...")
 bot.polling()
