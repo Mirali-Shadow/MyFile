@@ -6,17 +6,19 @@ from config import owner_id
 
 bot = config.bot
 
+admin_btn = [
+    [Button.inline("📋 لیست همه کاربران", b"all_list")],
+    [Button.inline("➕ افزایش امتیاز", b"increase_points"), Button.inline("➖ کاهش امتیاز", b"decrease_points")],
+    [Button.inline("🔍 بررسی کاربر", b"check_user")],
+    [Button.inline("🔊 پیام همگانی", b"broadcast")],
+    [Button.inline("❌ بستن پنل", b"close_panel")]
+]
+
 @events.register(events.NewMessage(pattern=r"/admin"))
 async def admin_panel(event):
     user_id = event.sender_id
     if user_id == owner_id:
-        btn = [
-            [Button.inline("📋 لیست همه کاربران", b"all_list")],
-            [Button.inline("➕ افزایش امتیاز", b"increase_points"), Button.inline("➖ کاهش امتیاز", b"decrease_points")],
-            [Button.inline("🔍 بررسی کاربر", b"check_user")],
-            [Button.inline("❌ بستن پنل", b"close_panel")]
-        ]
-        await event.respond("🎛 پنل مدیریت باز شد:", buttons=btn)
+        await event.respond("🎛 پنل مدیریت باز شد:", buttons=admin_btn)
 
 @bot.on(events.CallbackQuery(data=b"all_list"))
 async def show_all_users(event):
@@ -80,6 +82,57 @@ async def ask_user_for_decrease(event):
         except:
             await event.respond("❌ فرمت ورودی نادرست است! مثال: `123456789 50`")
 
+@bot.on(events.CallbackQuery(data=b"broadcast"))
+async def broadcast(event):
+    buttons = [
+        [Button.inline("📢 همگانی بات", data="broadcast_bot")],
+        [Button.inline("🔄 همگانی فوروارد", data="broadcast_forward")],
+        [Button.inline("بازگشت", b"back_to_panel")]
+    ]
+    await event.edit("لطفاً نوع ارسال پیام را انتخاب کنید:", buttons=buttons)
+
+@bot.on(events.CallbackQuery)
+async def broadcast_choice(event):
+    if event.data in [b"broadcast_bot", b"broadcast_forward"]:
+        is_forward = event.data == b"broadcast_forward"
+        
+        async with bot.conversation(event.sender_id) as conv:
+            await conv.send_message("📢 لطفاً پیام موردنظر را ارسال کنید:")
+            message = await conv.get_response()
+        
+        users = database.get_all_users_public() 
+        total_users = len(users)
+        count = 0
+
+        status_msg = await event.respond(f"⏳ ارسال پیام: 0/{total_users}")
+
+        for user in users:
+            try:
+                if is_forward:
+                    await bot.forward_messages(user, message)
+                else:
+                    if message.media:
+                        await bot.send_file(user, message.media, caption=message.text)
+                    else:
+                        await bot.send_message(user, message.text)
+                
+                count += 1
+                if count % 10 == 0 or count == total_users:
+                    await status_msg.edit(f"📊 ارسال پیام: {count}/{total_users} انجام شد")
+            except:
+                pass 
+
+        await status_msg.edit("✅ پیام همگانی ارسال شد!")
+
+@bot.on(events.CallbackQuery(data=b"back_to_panel"))
+async def back_to_panel(event):
+    await event.edit("🎛 پنل مدیریت باز شد:", buttons=admin_btn)
+
 @bot.on(events.CallbackQuery(data=b"close_panel"))
 async def close_panel(event):
-    await event.edit("✅ پنل مدیریت بسته شد.", buttons=[[Button.text("/admin", resize=True)]])
+    await event.edit("✅ پنل مدیریت بسته شد.", buttons=[Button.inline("باز کردن پنل", b"back_to_panel")])
+
+@bot.on(events.CallbackQuery(data=b"back_to_panel"))
+async def back_to_panel(event):
+    await event.delete()
+    await admin_panel(event)

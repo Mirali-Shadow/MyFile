@@ -2,6 +2,7 @@ from telethon import Button, events
 
 import config
 import membership
+
 bot = config.bot
 
 chek = membership.check_membership
@@ -18,7 +19,7 @@ async def increase(event):
 
     btn = [
         [Button.text("🎁 شارژ از طریق رفرال", resize=True), Button.text("🎮 جایزه روزانه")],
-        [Button.text("🔙 بازگشت")]
+        [Button.text("↩️ بازگشت")]
     ]
 
     if not non_member_channels:
@@ -46,6 +47,7 @@ async def buy_order(event):
 🌀 هوشمند ترین بات استارزی  
 🔐 پرداخت مطمئن و امن
 🔰 پشتیبانی حرفه‌ای و 24 ساعته
+
 {referral_link}
 """
         )
@@ -54,7 +56,7 @@ async def buy_order(event):
     elif text == "🎮 جایزه روزانه":
         await event.respond("کاربر گرامی با عرض پوزش ، این بخش هنوز تکمیل نشده و فعلا فعال نیست\nدر روز های آینده این بخش فعال خواهد شد \nاز صبر و شکیبایی شما متشکریم")
 
-    elif text == "🔙 بازگشت":
+    elif text == "↩️ بازگشت":
 
         start_btn = [
             [Button.text("⭐️ ثبت سفارش استارز ⭐️", resize=True, single_use=True)],

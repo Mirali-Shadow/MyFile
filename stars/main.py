@@ -15,6 +15,7 @@ import order
 import support
 import membership
 import order
+import user
 
 bot = config.bot
 
@@ -29,6 +30,10 @@ with bot as mirali :
 #___________________ order ________________________
 with bot as mirali :
     mirali.add_event_handler(order.increase)
+
+#___________________ user ________________________
+with bot as mirali :
+    mirali.add_event_handler(user.account)
 
 
 @bot.on(events.NewMessage(pattern=r"/start"))
@@ -48,13 +53,16 @@ async def start(event):
     inviter_id = int(match.group(1)) if match and int(match.group(1)) != user_id else None
 
     if not non_member_channels:
-        
         database.add_user(user_id, inviter_id)
 
-        async with bot.action(entity=event.chat_id, action='typing'):
-            await bot.send_message(event.chat_id, "درود به ربات استارز گیر رایگان خوش اومدید", buttons=btn)
-    else:
+        if inviter_id:
+            try:
+                await bot.send_message(inviter_id, "🎉 تبریک ! یک کاربر با لینک شما ثبت نام کرد 🎁", buttons=btn)
+            except Exception as e:
+                print(f"⚠️ خطا در ارسال پیام به معرف: {e}")
 
+        await bot.send_message(event.chat_id, "درود به ربات استارز گیر رایگان خوش اومدید", buttons=btn)
+    else:
         if inviter_id:
             database.store_temp_inviter(user_id, inviter_id)
         await membership.send_join_prompt(user_id, event.chat_id)

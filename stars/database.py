@@ -62,6 +62,15 @@ def get_all_users():
     conn.close()
     return users
 
+# 📌 تابع دریافت لیست کاربران
+def get_all_users_public():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id FROM users")
+    users = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return users
+
 # 📌 دریافت اطلاعات یک کاربر خاص
 def get_user_info(user_id):
     conn = sqlite3.connect(DATABASE)
@@ -78,6 +87,33 @@ def update_user_points(user_id, points):
     cursor.execute("UPDATE users SET points = points + ? WHERE user_id = ?", (points, user_id))
     conn.commit()
     conn.close()
+
+# 📌 دریافت اطلاعات کامل کاربر (امتیاز، ارجاع‌ها، و دعوت‌کننده)
+def get_full_user_info(user_id):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id, points, referrals, inviter_id FROM users WHERE user_id = ?", (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+    return user
+
+# 📌 دریافت نام و امتیاز همه کاربران برای نمایش لیست در حساب کاربری
+def get_all_users_info():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id, points, referrals FROM users ORDER BY points DESC")
+    users = cursor.fetchall()
+    conn.close()
+    return users
+
+# 📌 بررسی اینکه آیا کاربری دعوت‌کننده داشته است یا نه
+def get_inviter(user_id):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT inviter_id FROM users WHERE user_id = ?", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return result[0] if result else None
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS temp_referrals (

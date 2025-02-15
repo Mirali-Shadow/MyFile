@@ -11,16 +11,19 @@ support_id = config.support_id
 QUEUE_FILE = "support_queue.json"
 TIME_LIMIT = 24 * 3600
 
+
 def save_queue(data):
     with open(QUEUE_FILE, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
+
 
 def load_queue():
     try:
         with open(QUEUE_FILE, "r", encoding="utf-8") as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
-        return {} 
+        return {}
+
 
 def add_to_queue(user_id, message_text):
     queue = load_queue()
@@ -33,11 +36,23 @@ def add_to_queue(user_id, message_text):
     
     save_queue(queue)
 
+
 def remove_from_queue(user_id):
     queue = load_queue()
     if str(user_id) in queue:
         del queue[str(user_id)]
         save_queue(queue)
+
+
+def update_timestamp(user_id):
+    queue = load_queue()
+    current_time = time.time()
+    
+    if str(user_id) in queue:
+        queue[str(user_id)]["timestamp"] = current_time
+    
+    save_queue(queue)
+
 
 def can_send_message(user_id):
     queue = load_queue()
@@ -49,6 +64,7 @@ def can_send_message(user_id):
             return False 
     
     return True 
+
 
 @events.register(events.NewMessage(pattern="☎️ پشتیبانی"))
 async def support(event):
@@ -86,7 +102,7 @@ async def support(event):
 
                 add_to_queue(user_id, response.text)
 
-                await conv.send_message("✅ پیام شما ارسال شد! لطفاً منتظر پاسخ پشتیبانی باشید.")
+                await conv.send_message("✅ پیام شما ارسال شد! لطفاً منتظر پاسخ پشتیبانی باشید.", buttons=start_btn)
 
                 supp_btn = [
                     [Button.inline("✅ بررسی شد", data=f"checked_{user_id}")],
@@ -104,6 +120,7 @@ async def support(event):
     else:
         await sj(user_id, event.chat_id)
 
+
 @events.register(events.NewMessage(pattern="/admin_support"))
 async def show_support_queue(event):
     if event.sender_id != support_id:
@@ -120,13 +137,16 @@ async def show_support_queue(event):
 
     await bot.send_message(support_id, message)
 
+
 @bot.on(events.CallbackQuery(pattern=r"checked_(\d+)"))
 async def checked(event):
     user_id = int(event.pattern_match.group(1))
     await event.edit("✅ پیام بررسی شد و تأیید گردید.")
     await bot.send_message(user_id, "✅ پیام شما توسط پشتیبانی بررسی شد.")
     
+    update_timestamp(user_id)
     remove_from_queue(user_id)
+
 
 @bot.on(events.CallbackQuery(pattern=r"rejected_(\d+)"))
 async def rejected(event):
@@ -134,7 +154,9 @@ async def rejected(event):
     await event.edit("❌ پیام رد شد.")
     await bot.send_message(user_id, "❌ پیام شما به دلیل نقض قوانین رد شد.")
     
+    update_timestamp(user_id)
     remove_from_queue(user_id)
+
 
 @bot.on(events.CallbackQuery(pattern=r"reply_(\d+)"))
 async def reply_user(event):
@@ -147,6 +169,7 @@ async def reply_user(event):
             await bot.send_message(user_id, f"📩 پیام جدید از پشتیبانی:\n\n{response.text}")
             await event.edit("✅ پاسخ شما به کاربر ارسال شد.")
             
+            update_timestamp(user_id)
             remove_from_queue(user_id)
         except Exception as e:
             print(f"❌ خطا در پاسخ به کاربر: {e}")
