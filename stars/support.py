@@ -109,7 +109,7 @@ async def support(event):
 
                 if response.text == "🔙 بازگشت":
                     await conv.send_message("❌ عملیات لغو شد.")
-                    await event.respond("به منوی اصلی بازگشتید", buttons=start_btn)
+                    await event.respond("به منوی اصلی بازگشتید ♻️", buttons=start_btn)
                     return
 
                 add_to_queue(user_id, response.text)

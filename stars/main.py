@@ -8,6 +8,7 @@ from telethon.tl import functions, types
 from telethon.tl.functions.messages import SendReactionRequest
 from telethon.tl.types import ReactionEmoji, ReactionPaid
 
+import stars
 import admin
 import config
 import database
@@ -34,6 +35,10 @@ with bot as mirali :
 #___________________ user ________________________
 with bot as mirali :
     mirali.add_event_handler(user.account)
+
+#___________________ stars ________________________
+with bot as mirali :
+    mirali.add_event_handler(stars.stars)
 
 
 @bot.on(events.NewMessage(pattern=r"/start"))
