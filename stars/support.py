@@ -9,6 +9,7 @@ sj = membership.send_join_prompt
 bot = config.bot
 support_id = config.support_id 
 QUEUE_FILE = "support_queue.json"
+LAST_MESSAGE_FILE = "last_message.json"
 TIME_LIMIT = 24 * 3600
 
 
@@ -24,17 +25,38 @@ def load_queue():
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
+def save_last_message(data):
+    with open(LAST_MESSAGE_FILE, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4, ensure_ascii=False)
+
+def load_last_message():
+    try:
+        with open(LAST_MESSAGE_FILE, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def update_last_message(user_id):
+    last_messages = load_last_message()
+    last_messages[str(user_id)] = time.time()  # ذخیره زمان ارسال پیام
+    save_last_message(last_messages)
+
+def can_send_message(user_id):
+    last_messages = load_last_message()
+    last_time = last_messages.get(str(user_id))
+
+    if last_time and time.time() - last_time < TIME_LIMIT:
+        return False  # هنوز ۲۴ ساعت نگذشته
+    return True  # می‌تواند پیام جدید ارسال کند
 
 def add_to_queue(user_id, message_text):
     queue = load_queue()
-    current_time = time.time()
-    
     queue[str(user_id)] = {
         "message": message_text,
-        "timestamp": current_time 
+        "timestamp": time.time()
     }
-    
     save_queue(queue)
+    update_last_message(user_id)  # ثبت زمان آخرین پیام برای حفظ تایمر
 
 
 def remove_from_queue(user_id):
@@ -54,16 +76,6 @@ def update_timestamp(user_id):
     save_queue(queue)
 
 
-def can_send_message(user_id):
-    queue = load_queue()
-    user_data = queue.get(str(user_id))
-    
-    if user_data:
-        last_time = user_data["timestamp"]
-        if time.time() - last_time < TIME_LIMIT:
-            return False 
-    
-    return True 
 
 
 @events.register(events.NewMessage(pattern="☎️ پشتیبانی"))
@@ -121,7 +133,7 @@ async def support(event):
         await sj(user_id, event.chat_id)
 
 
-@events.register(events.NewMessage(pattern="/admin_support"))
+@bot.on(events.NewMessage(pattern="/admin_support"))
 async def show_support_queue(event):
     if event.sender_id != support_id:
         return
@@ -138,27 +150,25 @@ async def show_support_queue(event):
     await bot.send_message(support_id, message)
 
 
-@bot.on(events.CallbackQuery(pattern=r"checked_(\d+)"))
+@bot.on(events.CallbackQuery(data=r"checked_(\d+)"))
 async def checked(event):
     user_id = int(event.pattern_match.group(1))
     await event.edit("✅ پیام بررسی شد و تأیید گردید.")
     await bot.send_message(user_id, "✅ پیام شما توسط پشتیبانی بررسی شد.")
-    
-    update_timestamp(user_id)
-    remove_from_queue(user_id)
 
+    update_last_message(user_id)  # ثبت زمان برای حفظ تایمر
+    remove_from_queue(user_id)  # حذف پیام از صف پشتیبانی
 
-@bot.on(events.CallbackQuery(pattern=r"rejected_(\d+)"))
+@bot.on(events.CallbackQuery(data=r"rejected_(\d+)"))
 async def rejected(event):
     user_id = int(event.pattern_match.group(1))
     await event.edit("❌ پیام رد شد.")
     await bot.send_message(user_id, "❌ پیام شما به دلیل نقض قوانین رد شد.")
-    
-    update_timestamp(user_id)
-    remove_from_queue(user_id)
 
+    update_last_message(user_id)
+    remove_from_queue(user_id) 
 
-@bot.on(events.CallbackQuery(pattern=r"reply_(\d+)"))
+@bot.on(events.CallbackQuery(data=r"reply_(\d+)"))
 async def reply_user(event):
     user_id = int(event.pattern_match.group(1))
     async with bot.conversation(event.chat_id) as conv:
@@ -168,9 +178,9 @@ async def reply_user(event):
 
             await bot.send_message(user_id, f"📩 پیام جدید از پشتیبانی:\n\n{response.text}")
             await event.edit("✅ پاسخ شما به کاربر ارسال شد.")
-            
-            update_timestamp(user_id)
-            remove_from_queue(user_id)
+
+            update_last_message(user_id)  # ثبت زمان برای حفظ تایمر
+            remove_from_queue(user_id)  # حذف پیام از صف پشتیبانی
         except Exception as e:
             print(f"❌ خطا در پاسخ به کاربر: {e}")
             await event.respond("⚠️ مشکلی پیش آمد. لطفاً دوباره تلاش کنید.")
