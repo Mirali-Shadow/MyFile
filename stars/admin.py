@@ -28,8 +28,8 @@ async def show_all_users(event):
         return
 
     message = "📋 **لیست کاربران:**\n\n"
-    for user in users:
-        message += f"👤 **User ID:** `{user[0]}` | ⭐️ point: `{user[1]}` | 👥 invited: `{user[2]}`\n"
+    for index, user in enumerate(users, start=1):
+        message += f"{index}. 👤 **User ID:** `{user[0]}` | ⭐️ point: `{user[1]}` | 👥 invited: `{user[2]}`\n"
     
     await event.respond(message)
 

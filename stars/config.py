@@ -8,5 +8,5 @@ support_id = 7013701883
 
 bot_name = "shadofficialbot"
 
-bot = TelegramClient("test", api_id, api_hash)
+bot = TelegramClient("STARS", api_id, api_hash)
 bot.start(bot_token=token)

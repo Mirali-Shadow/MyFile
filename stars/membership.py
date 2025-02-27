@@ -10,7 +10,7 @@ bot = config.bot
 
 all_channels = [
     {"display_link": "https://t.me/Jet_Stars", "channel_id": "-1002306113890", "name": "کانال مجموعه"},
-    {"display_link": "https://t.me/CryptoTacticians", "channel_id": "-1002063272786", "name": "Crypto Tactician"}
+    # {"display_link": "https://t.me/CryptoTacticians", "channel_id": "-1002063272786", "name": "Crypto Tactician"}
 ]
 # 1001431076863  -  miox
 
